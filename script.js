@@ -301,6 +301,34 @@ function updateChart(results) {
   );
 
   riskChart.update();
+
+  document.getElementById("riskChart").onclick = function(evt) {
+    const points = riskChart.getElementsAtEventForMode(
+      evt,
+      "nearest",
+      { intersect: true },
+      true
+    );
+
+    if (points.length) {
+      const index = points[0].index;
+      const selected = top[index];
+
+      const lat = Number(selected["위도"]);
+      const lon = Number(selected["경도"]);
+
+      if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+        map.setView([lat, lon], 15, {
+          animate: true,
+          duration: 1.5
+        });
+
+        if (markers[index]) {
+          markers[index].openPopup();
+        }
+      }
+    }
+  };
 }
 
 function updateTable(results) {
