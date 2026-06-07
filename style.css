@@ -58,11 +58,13 @@ h1 {
 }
 
 .hero-desc {
-  max-width: 720px;
+  max-width: none;
+  width: 100%;
   margin: 24px auto 40px;
   color: #6e6e73;
   font-size: 19px;
   line-height: 1.6;
+  white-space: nowrap;
 }
 
 .control-card {
