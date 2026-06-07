@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Black Ice Forecast</title>
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 
   <link
     rel="stylesheet"
@@ -13,136 +14,170 @@
   />
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <header class="nav">
-    <div class="nav-logo">Black Ice Forecast</div>
-    <div class="nav-menu">
-      <span>Risk</span>
-      <span>Weather</span>
-      <span>Map</span>
-      <span>Model</span>
-    </div>
-  </header>
 
-  <section class="hero fade-up">
-    <p class="eyebrow">Real-time AI prediction</p>
-    <h1>도로 위 보이지 않는 위험을<br />실시간으로 예측합니다.</h1>
-    <p class="desc">
-      기상청 API와 지형 데이터를 기반으로 결빙 가능성과 블랙아이스 사고 위험도를 분석합니다.
-    </p>
+<header class="nav">
+  <div class="logo">Black Ice Forecast</div>
 
-    <div class="search-card glass">
-      <div class="field">
-        <label>날짜</label>
-        <input type="date" id="date" />
-      </div>
+  <div class="menu">
+    <span>Risk</span>
+    <span>Weather</span>
+    <span>Map</span>
+    <span>AI</span>
+  </div>
+</header>
 
-      <div class="field">
-        <label>시간</label>
-        <input type="time" id="time" />
-      </div>
+<section class="hero">
 
-      <div class="field">
-        <label>지역</label>
-        <select id="region">
-          <option value="all">전체 지점</option>
-          <option value="gangneung">강릉권</option>
-          <option value="seoul">수도권</option>
-          <option value="busan">부산권</option>
-        </select>
-      </div>
+  <p class="eyebrow">
+    Real-time AI prediction
+  </p>
 
-      <button onclick="predictRisk()">위험도 예측</button>
-    </div>
-  </section>
+  <h1>
+    도로 위 보이지 않는 위험을<br>
+    실시간으로 예측합니다.
+  </h1>
 
-  <section class="dashboard fade-up">
-    <div class="risk-card" id="riskCard">
-      <p>Black Ice Risk</p>
-      <h2 id="accidentProb">-</h2>
-      <span id="riskLevel">예측 전</span>
+  <p class="hero-desc">
+    기상청 API와 지형 데이터를 기반으로
+    블랙아이스 위험도를 분석하고
+    위험 지역을 시각화합니다.
+  </p>
+
+  <div class="control-card">
+
+    <div class="field">
+      <label>날짜</label>
+      <input type="date" id="date">
     </div>
 
-    <div class="info-card">
-      <p>결빙 확률</p>
-      <h3 id="icingProb">-</h3>
+    <div class="field">
+      <label>시간</label>
+      <input type="time" id="time">
     </div>
 
-    <div class="info-card">
-      <p>기온</p>
-      <h3 id="temp">-</h3>
+    <div class="field">
+      <label>도</label>
+      <select id="province"></select>
     </div>
 
-    <div class="info-card">
-      <p>습도</p>
-      <h3 id="humidity">-</h3>
+    <div class="field">
+      <label>시</label>
+      <select id="city"></select>
     </div>
 
-    <div class="info-card">
-      <p>풍속</p>
-      <h3 id="wind">-</h3>
+    <button onclick="predictRisk()">
+      위험도 예측
+    </button>
+
+  </div>
+</section>
+
+<section class="dashboard">
+
+  <div class="main-card" id="mainRiskCard">
+    <p>Black Ice Risk</p>
+
+    <h2 id="mainRisk">-</h2>
+
+    <span id="riskLevel">
+      예측 전
+    </span>
+  </div>
+
+  <div class="mini-card">
+    <p>결빙 확률</p>
+    <h3 id="icingProb">-</h3>
+  </div>
+
+  <div class="mini-card">
+    <p>기온</p>
+    <h3 id="temp">-</h3>
+  </div>
+
+  <div class="mini-card">
+    <p>습도</p>
+    <h3 id="humidity">-</h3>
+  </div>
+
+  <div class="mini-card">
+    <p>풍속</p>
+    <h3 id="wind">-</h3>
+  </div>
+
+</section>
+
+<section class="content-grid">
+
+  <div class="map-card">
+
+    <div class="section-top">
+      <p class="eyebrow">Risk map</p>
+      <h2>결빙 위험 지도</h2>
     </div>
-  </section>
 
-  <section class="content-grid fade-up">
-    <div class="panel map-panel">
-      <div class="section-title">
-        <p class="eyebrow">Risk map</p>
-        <h2>위험도 지도</h2>
-        <p>예측된 지점별 위험도를 색상으로 표시합니다.</p>
-      </div>
-
-      <div class="legend">
-        <span><i class="dot low"></i>낮음</span>
-        <span><i class="dot caution"></i>주의</span>
-        <span><i class="dot danger"></i>위험</span>
-        <span><i class="dot extreme"></i>매우 위험</span>
-      </div>
-
-      <div id="map"></div>
+    <div class="legend">
+      <span><i class="dot low"></i>낮음</span>
+      <span><i class="dot caution"></i>주의</span>
+      <span><i class="dot danger"></i>위험</span>
+      <span><i class="dot extreme"></i>매우 위험</span>
     </div>
 
-    <div class="panel chart-panel">
-      <div class="section-title">
-        <p class="eyebrow">Prediction chart</p>
-        <h2>위험도 상위 지점</h2>
-        <p>예측 결과 중 블랙아이스 위험도가 높은 지점을 그래프로 표시합니다.</p>
-      </div>
+    <div id="map"></div>
 
-      <canvas id="riskChart"></canvas>
-    </div>
-  </section>
+  </div>
 
-  <section class="table-section fade-up">
-    <div class="section-title">
-      <p class="eyebrow">Result table</p>
-      <h2>상위 위험 구간 예시</h2>
+  <div class="chart-card">
+
+    <div class="section-top">
+      <p class="eyebrow">Top Risk</p>
+      <h2>위험도 상위 지점</h2>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>순위</th>
-            <th>위도</th>
-            <th>경도</th>
-            <th>결빙확률</th>
-            <th>사고위험도</th>
-            <th>위험등급</th>
-          </tr>
-        </thead>
-        <tbody id="resultTable">
-          <tr>
-            <td colspan="6">예측 실행 후 결과가 표시됩니다.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <canvas id="riskChart"></canvas>
 
-  <script src="script.js"></script>
+  </div>
+
+</section>
+
+<section class="table-section">
+
+  <div class="section-top">
+    <p class="eyebrow">Result</p>
+    <h2>위험 지점 리스트</h2>
+  </div>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>순위</th>
+        <th>시도</th>
+        <th>시군구</th>
+        <th>위험도</th>
+        <th>결빙확률</th>
+      </tr>
+    </thead>
+
+    <tbody id="resultTable">
+
+      <tr>
+        <td colspan="5">
+          예측 결과가 표시됩니다.
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</section>
+
+<script src="script.js"></script>
+
 </body>
 </html>
