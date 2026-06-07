@@ -37,7 +37,6 @@ async function loadRegions() {
     }
 
     regions = data.regions;
-
     provinceSelect.innerHTML = "";
 
     Object.keys(regions).forEach((province) => {
@@ -48,12 +47,10 @@ async function loadRegions() {
     });
 
     updateCityOptions();
-
     provinceSelect.addEventListener("change", updateCityOptions);
 
   } catch (error) {
     console.error("지역 목록 불러오기 실패:", error);
-
     provinceSelect.innerHTML = `<option>지역 불러오기 실패</option>`;
     citySelect.innerHTML = `<option>지역 불러오기 실패</option>`;
   }
@@ -147,7 +144,7 @@ async function predictRisk() {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("예측 API 오류:", errorText);
-      alert("예측 API 오류가 발생했습니다.");
+      alert("예측 API 오류: " + errorText);
       return;
     }
 
@@ -161,8 +158,8 @@ async function predictRisk() {
 
     results.sort(
       (a, b) =>
-        b.blackice_probability_percent -
-        a.blackice_probability_percent
+        Number(b.blackice_probability_percent || 0) -
+        Number(a.blackice_probability_percent || 0)
     );
 
     updateCards(results[0]);
@@ -172,28 +169,44 @@ async function predictRisk() {
 
   } catch (error) {
     console.error("예측 요청 실패:", error);
-    alert("예측 요청에 실패했습니다.");
+    alert("예측 요청 실패: " + error.message);
   }
+}
+
+function formatValue(value, unit = "") {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "정보 없음";
+  }
+
+  return value + unit;
+}
+
+function formatPercent(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "정보 없음";
+  }
+
+  return Number(value).toFixed(1) + "%";
 }
 
 function updateCards(result) {
   document.getElementById("mainRisk").innerText =
-    Number(result.blackice_probability_percent).toFixed(1) + "%";
+    formatPercent(result.blackice_probability_percent);
 
   document.getElementById("icingProb").innerText =
-    Number(result.icing_probability_percent).toFixed(1) + "%";
+    formatPercent(result.icing_probability_percent);
 
   document.getElementById("temp").innerText =
-    result.기온 + "℃";
+    formatValue(result.기온, "℃");
 
   document.getElementById("humidity").innerText =
-    result.습도 + "%";
+    formatValue(result.습도, "%");
 
   document.getElementById("wind").innerText =
-    result.풍속 + "m/s";
+    formatValue(result.풍속, "m/s");
 
   document.getElementById("riskLevel").innerText =
-    result.risk_level;
+    result.risk_level || "정보 없음";
 }
 
 function getRiskColor(level) {
@@ -225,10 +238,12 @@ function updateMap(results) {
     })
       .addTo(map)
       .bindPopup(`
-        <b>${r.시도 || ""} ${r.시군구 || ""}</b><br>
-        위험도: ${Number(r.blackice_probability_percent).toFixed(1)}%<br>
-        결빙확률: ${Number(r.icing_probability_percent).toFixed(1)}%<br>
-        기온: ${r.기온}℃
+        <b>${r.시도 || ""} ${r.시군구 || ""} ${r.읍면동 || ""}</b><br>
+        위험도: ${formatPercent(r.blackice_probability_percent)}<br>
+        결빙확률: ${formatPercent(r.icing_probability_percent)}<br>
+        기온: ${formatValue(r.기온, "℃")}<br>
+        습도: ${formatValue(r.습도, "%")}<br>
+        풍속: ${formatValue(r.풍속, "m/s")}
       `);
 
     markers.push(marker);
@@ -248,7 +263,7 @@ function updateChart(results) {
   );
 
   riskChart.data.datasets[0].data = top.map((r) =>
-    Number(r.blackice_probability_percent).toFixed(1)
+    Number(r.blackice_probability_percent || 0).toFixed(1)
   );
 
   riskChart.update();
@@ -265,8 +280,8 @@ function updateTable(results) {
       <td>${i + 1}</td>
       <td>${r.시도 || "-"}</td>
       <td>${r.시군구 || "-"}</td>
-      <td>${Number(r.blackice_probability_percent).toFixed(1)}%</td>
-      <td>${Number(r.icing_probability_percent).toFixed(1)}%</td>
+      <td>${formatPercent(r.blackice_probability_percent)}</td>
+      <td>${formatPercent(r.icing_probability_percent)}</td>
     `;
 
     tbody.appendChild(row);
