@@ -14,7 +14,6 @@
   />
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -43,9 +42,7 @@
   </h1>
 
   <p class="hero-desc">
-    기상청 API와 지형 데이터를 기반으로
-    블랙아이스 위험도를 분석하고
-    위험 지역을 시각화합니다.
+    기상청 API와 지형 데이터를 기반으로 블랙아이스 위험도를 분석하고 위험 지역을 시각화합니다.
   </p>
 
   <div class="control-card">
@@ -81,12 +78,8 @@
 
   <div class="main-card" id="mainRiskCard">
     <p>Black Ice Risk</p>
-
     <h2 id="mainRisk">-</h2>
-
-    <span id="riskLevel">
-      예측 전
-    </span>
+    <span id="riskLevel">예측 전</span>
   </div>
 
   <div class="mini-card">
@@ -117,7 +110,7 @@
 
     <div class="section-top">
       <p class="eyebrow">Risk map</p>
-      <h2>결빙 위험 지도</h2>
+      <h2>블랙아이스 사고 위험 지도</h2>
     </div>
 
     <div class="legend">
@@ -152,7 +145,6 @@
   </div>
 
   <table>
-
     <thead>
       <tr>
         <th>순위</th>
@@ -164,15 +156,10 @@
     </thead>
 
     <tbody id="resultTable">
-
       <tr>
-        <td colspan="5">
-          예측 결과가 표시됩니다.
-        </td>
+        <td colspan="5">예측 결과가 표시됩니다.</td>
       </tr>
-
     </tbody>
-
   </table>
 
 </section>
