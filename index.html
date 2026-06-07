@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Ice AI</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Black Ice AI</h1>
+    <p class="subtitle">
+      실시간 블랙아이스 위험 예측 시스템
+    </p>
+
+    <div class="card">
+
+      <label>날짜</label>
+      <input type="date" id="date">
+
+      <label>시간</label>
+      <input type="time" id="time">
+
+      <button onclick="predictRisk()">
+        위험도 예측하기
+      </button>
+
+    </div>
+
+    <div class="result-card">
+
+      <h2>예측 결과</h2>
+
+      <div class="result-grid">
+
+        <div class="result-item">
+          <span>결빙 확률</span>
+          <h3 id="icingProb">-</h3>
+        </div>
+
+        <div class="result-item">
+          <span>사고 위험도</span>
+          <h3 id="accidentProb">-</h3>
+        </div>
+
+        <div class="result-item">
+          <span>기온</span>
+          <h3 id="temp">-</h3>
+        </div>
+
+        <div class="result-item">
+          <span>습도</span>
+          <h3 id="humidity">-</h3>
+        </div>
+
+        <div class="result-item">
+          <span>풍속</span>
+          <h3 id="wind">-</h3>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
