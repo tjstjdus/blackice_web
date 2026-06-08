@@ -274,6 +274,7 @@ async function predictRisk() {
           city,
           max_points: 20
         };
+    
 
     const response = await fetch(`${API_BASE}/predict`, {
       method: "POST",
@@ -290,7 +291,6 @@ async function predictRisk() {
       alert("결과 없음");
       return;
     }
-
     results.sort((a, b) =>
       Number(b.blackice_probability_percent || 0) -
       Number(a.blackice_probability_percent || 0)
@@ -314,6 +314,26 @@ async function predictRisk() {
     console.error(error);
     alert("예측 실패");
   }
+  const province =
+  document.getElementById("province").value;
+
+  const city =
+    document.getElementById("city").value;
+  
+  const date =
+    document.getElementById("date").value;
+  
+  const time =
+    document.getElementById("time").value;
+    document.getElementById(
+    "selectedMapSub"
+  ).innerText =
+    `${province} ${city} · ${date} ${time}`;
+  
+  document.getElementById(
+    "liveMapSub"
+  ).innerText =
+    `${province} ${city} 실시간 기준`;
 }
 
 function setMainMap(type) {
