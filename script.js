@@ -181,8 +181,8 @@ function changeMode() {
     timeInput.disabled = true;
 
     startRealtimeMode();
-
     setMainMap("live");
+
   } else {
     realtimeMode = false;
 
@@ -190,7 +190,6 @@ function changeMode() {
     timeInput.disabled = false;
 
     clearInterval(liveTimer);
-
     setMainMap("selected");
   }
 }
@@ -199,7 +198,6 @@ function startRealtimeMode() {
   runRealtimePrediction();
 
   clearInterval(liveTimer);
-
   liveTimer = setInterval(runRealtimePrediction, 300000);
 }
 
@@ -282,7 +280,6 @@ async function predictRisk() {
           city,
           max_points: 20
         };
-    
 
     const response = await fetch(`${API_BASE}/predict`, {
       method: "POST",
@@ -299,6 +296,7 @@ async function predictRisk() {
       alert("결과 없음");
       return;
     }
+
     results.sort((a, b) =>
       Number(b.blackice_probability_percent || 0) -
       Number(a.blackice_probability_percent || 0)
@@ -318,30 +316,18 @@ async function predictRisk() {
     updateChart(results);
     updateTable(results);
 
+    document.getElementById("selectedMapSub").innerText =
+      realtimeMode
+        ? `${province} ${city} · 실시간 기준`
+        : `${province} ${city} · ${date} ${time}`;
+
+    document.getElementById("liveMapSub").innerText =
+      `${province} ${city} · 실시간 기준`;
+
   } catch (error) {
     console.error(error);
     alert("예측 실패");
   }
-  const province =
-  document.getElementById("province").value;
-
-  const city =
-    document.getElementById("city").value;
-  
-  const date =
-    document.getElementById("date").value;
-  
-  const time =
-    document.getElementById("time").value;
-    document.getElementById(
-    "selectedMapSub"
-  ).innerText =
-    `${province} ${city} · ${date} ${time}`;
-  
-  document.getElementById(
-    "liveMapSub"
-  ).innerText =
-    `${province} ${city} 실시간 기준`;
 }
 
 function setMainMap(type) {
@@ -351,7 +337,7 @@ function setMainMap(type) {
 
   if (type === "selected") {
     grid.classList.add("selected-large");
-  } else {
+  } else if (type === "live") {
     grid.classList.add("live-large");
   }
 
@@ -370,29 +356,6 @@ function resetMapLayout() {
     map.invalidateSize(true);
     liveMap.invalidateSize(true);
   }, 600);
-}
-
-function resetMapLayout() {
-  const selected = document.querySelector(".selected-panel");
-  const live = document.querySelector(".live-panel");
-
-  selected.classList.remove("large", "small");
-  live.classList.remove("large", "small");
-
-  setTimeout(() => {
-
-  map.invalidateSize(true);
-  liveMap.invalidateSize(true);
-
-  map.eachLayer(function () {
-    map.invalidateSize();
-  });
-
-  liveMap.eachLayer(function () {
-    liveMap.invalidateSize();
-  });
-
-}, 500);
 }
 
 function getCurrentDateTime() {
