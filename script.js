@@ -317,34 +317,31 @@ async function predictRisk() {
 }
 
 function setMainMap(type) {
-  const selected = document.querySelector(".selected-panel");
-  const live = document.querySelector(".live-panel");
+  const grid = document.getElementById("mapCompareGrid");
 
-  selected.classList.remove("large", "small");
-  live.classList.remove("large", "small");
+  grid.classList.remove("selected-large", "live-large");
 
   if (type === "selected") {
-    selected.classList.add("large");
-    live.classList.add("small");
+    grid.classList.add("selected-large");
   } else {
-    live.classList.add("large");
-    selected.classList.add("small");
+    grid.classList.add("live-large");
   }
 
   setTimeout(() => {
+    map.invalidateSize(true);
+    liveMap.invalidateSize(true);
+  }, 500);
+}
 
-  map.invalidateSize(true);
-  liveMap.invalidateSize(true);
+function resetMapLayout() {
+  const grid = document.getElementById("mapCompareGrid");
 
-  map.eachLayer(function () {
-    map.invalidateSize();
-  });
+  grid.classList.remove("selected-large", "live-large");
 
-  liveMap.eachLayer(function () {
-    liveMap.invalidateSize();
-  });
-
-}, 500);
+  setTimeout(() => {
+    map.invalidateSize(true);
+    liveMap.invalidateSize(true);
+  }, 500);
 }
 
 function resetMapLayout() {
