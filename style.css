@@ -475,3 +475,88 @@ tbody tr:hover {
 .map-panel.small .legend {
   font-size: 12px;
 }
+
+/* 전체 폭 통일 */
+.control-card,
+.dashboard,
+.map-size-controls,
+.content-grid,
+.table-section,
+.chart-section {
+  max-width: 1500px !important;
+  width: 100%;
+}
+
+/* 지도 버튼 정렬 */
+.map-size-controls {
+  margin: 0 auto 22px !important;
+  padding: 0 32px !important;
+  justify-content: center;
+}
+
+/* 지도 영역 grid로 고정 */
+.map-compare-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 26px !important;
+  align-items: stretch !important;
+}
+
+/* 기준시각 확대 */
+.map-compare-grid.selected-large {
+  grid-template-columns: 2.8fr 0.7fr !important;
+}
+
+/* 실시간 확대 */
+.map-compare-grid.live-large {
+  grid-template-columns: 0.7fr 2.8fr !important;
+}
+
+/* flex 방식 완전 무력화 */
+.map-panel {
+  flex: unset !important;
+  min-width: 0;
+  width: auto !important;
+}
+
+/* 지도 세로 더 길게 */
+#map,
+#liveMap {
+  height: 700px !important;
+}
+
+/* 작은 지도 제목 축소 */
+.map-compare-grid.selected-large .live-panel .section-top h2,
+.map-compare-grid.live-large .selected-panel .section-top h2 {
+  font-size: 22px !important;
+  white-space: normal !important;
+}
+
+.map-compare-grid.selected-large .live-panel .eyebrow,
+.map-compare-grid.live-large .selected-panel .eyebrow {
+  font-size: 12px !important;
+}
+
+.map-compare-grid.selected-large .live-panel small,
+.map-compare-grid.live-large .selected-panel small {
+  font-size: 11px !important;
+}
+
+/* 반반 보기일 때 제목 정상 */
+.map-compare-grid:not(.selected-large):not(.live-large) .section-top h2 {
+  font-size: 32px !important;
+  white-space: nowrap;
+}
+
+/* 표, 그래프 폭 정렬 */
+.table-section,
+.chart-section {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.chart-card {
+  width: 100% !important;
+}
