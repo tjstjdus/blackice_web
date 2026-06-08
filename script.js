@@ -841,7 +841,7 @@ function zoomToLocation(lat, lon) {
 function updateChart(results) {
 
   const top =
-    results.slice(0, 7);
+    results.slice(0, 10);
 
   riskChart.data.labels =
     top.map(r => r.읍면동);
@@ -852,6 +852,13 @@ function updateChart(results) {
         r.blackice_probability_percent
       ).toFixed(1)
     );
+
+  riskChart.data.datasets[0].backgroundColor =
+  top.map(r =>
+    getRiskColorByPercent(
+      r.blackice_probability_percent
+    )
+  );
 
   riskChart.update();
 
