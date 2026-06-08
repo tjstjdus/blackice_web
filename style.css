@@ -506,3 +506,10 @@ tbody tr:hover {
 .map-compare-grid.live-large .live-panel #liveMap {
   height: 720px !important;
 }
+.control-card {
+  width: 1350px !important;
+  max-width: calc(100vw - 120px) !important;
+
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
