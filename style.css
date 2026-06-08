@@ -84,11 +84,11 @@ h1 {
   border-radius: 30px;
   display: grid;
   grid-template-columns:
-    minmax(160px, 1fr)
-    minmax(160px, 1fr)
-    minmax(160px, 1fr)
-    minmax(160px, 1fr)
-    minmax(160px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
     auto;
 
   width: min(1500px, calc(100% - 48px)) !important;
