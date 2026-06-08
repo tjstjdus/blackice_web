@@ -104,25 +104,46 @@
 
 </section>
 
-<section class="content-grid">
+<section class="content-grid map-compare-grid">
 
   <div class="map-card">
 
     <div class="section-top">
-      <p class="eyebrow">Risk map</p>
-      <h2>블랙아이스 사고 위험 지도</h2>
+      <p class="eyebrow">Selected time risk map</p>
+      <h2>선택 시각 블랙아이스 사고 위험 지도</h2>
     </div>
 
-    <div class="legend">
-      <span><i class="dot low"></i>낮음</span>
-      <span><i class="dot caution"></i>주의</span>
-      <span><i class="dot danger"></i>위험</span>
-      <span><i class="dot extreme"></i>매우 위험</span>
+    <div class="legend gradient-legend">
+      <span>낮음</span>
+      <div class="gradient-bar"></div>
+      <span>높음</span>
     </div>
 
     <div id="map"></div>
 
   </div>
+
+  <div class="map-card">
+
+    <div class="section-top">
+      <p class="eyebrow">Real-time risk map</p>
+      <h2>지역 실시간 사고 위험 지도</h2>
+      <small id="liveUpdatedAt">현재 기상 API 기준 자동 업데이트</small>
+    </div>
+
+    <div class="legend gradient-legend">
+      <span>낮음</span>
+      <div class="gradient-bar"></div>
+      <span>높음</span>
+    </div>
+
+    <div id="liveMap"></div>
+
+  </div>
+
+</section>
+
+<section class="content-grid">
 
   <div class="chart-card">
 
