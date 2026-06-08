@@ -9,93 +9,145 @@ let liveMarkers = [];
 let riskChart;
 let regions = {};
 
-let liveTimer = null;
 let realtimeMode = false;
+let liveTimer = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+
   try {
+
     initMap();
     initLiveMap();
     initChart();
+
     await loadRegions();
+
     setDateLimit();
+
   } catch (error) {
-    console.error("초기 실행 오류:", error);
-    alert("초기 데이터를 불러오지 못했습니다.");
+
+    console.error(error);
+
+    alert("초기 로딩 실패");
   }
 });
 
 function setDateLimit() {
+
   const now = new Date();
 
-  const futureLimit = new Date(
-    now.getTime() + (6 * 60 * 60 * 1000)
-  );
-
-  const dateInput = document.getElementById("date");
-  const timeInput = document.getElementById("time");
+  const futureLimit =
+    new Date(
+      now.getTime()
+      + (6 * 60 * 60 * 1000)
+    );
 
   const yyyy = futureLimit.getFullYear();
-  const mm = String(futureLimit.getMonth() + 1).padStart(2, "0");
-  const dd = String(futureLimit.getDate()).padStart(2, "0");
 
-  dateInput.max = `${yyyy}-${mm}-${dd}`;
+  const mm =
+    String(
+      futureLimit.getMonth() + 1
+    ).padStart(2, "0");
 
-  timeInput.addEventListener("change", validateFutureTime);
-  dateInput.addEventListener("change", validateFutureTime);
+  const dd =
+    String(
+      futureLimit.getDate()
+    ).padStart(2, "0");
+
+  document.getElementById("date").max =
+    `${yyyy}-${mm}-${dd}`;
+
+  document
+    .getElementById("date")
+    .addEventListener(
+      "change",
+      validateFutureTime
+    );
+
+  document
+    .getElementById("time")
+    .addEventListener(
+      "change",
+      validateFutureTime
+    );
 }
 
 function validateFutureTime() {
-  const dateInput = document.getElementById("date");
-  const timeInput = document.getElementById("time");
 
-  if (!dateInput.value || !timeInput.value) {
+  const date =
+    document.getElementById("date").value;
+
+  const time =
+    document.getElementById("time").value;
+
+  if (!date || !time) {
     return;
   }
 
-  const selected = new Date(
-    `${dateInput.value}T${timeInput.value}`
-  );
+  const selected =
+    new Date(`${date}T${time}`);
 
-  const now = new Date();
-
-  const futureLimit = new Date(
-    now.getTime() + (6 * 60 * 60 * 1000)
-  );
+  const futureLimit =
+    new Date(
+      Date.now()
+      + (6 * 60 * 60 * 1000)
+    );
 
   if (selected > futureLimit) {
-    alert("미래 예측은 현재 기준 6시간 이내만 가능합니다.");
 
-    const hh = String(futureLimit.getHours()).padStart(2, "0");
-    const mi = String(futureLimit.getMinutes()).padStart(2, "0");
+    alert(
+      "미래 예측은 현재 기준 6시간 이내만 가능합니다."
+    );
 
-    timeInput.value = `${hh}:${mi}`;
+    const hh =
+      String(
+        futureLimit.getHours()
+      ).padStart(2, "0");
+
+    const mi =
+      String(
+        futureLimit.getMinutes()
+      ).padStart(2, "0");
+
+    document.getElementById("time").value =
+      `${hh}:${mi}`;
   }
 }
 
 async function loadRegions() {
-  const provinceSelect = document.getElementById("province");
-  const citySelect = document.getElementById("city");
 
-  provinceSelect.innerHTML = `<option>불러오는 중...</option>`;
-  citySelect.innerHTML = `<option>불러오는 중...</option>`;
+  const provinceSelect =
+    document.getElementById("province");
+
+  const citySelect =
+    document.getElementById("city");
+
+  provinceSelect.innerHTML =
+    `<option>불러오는 중...</option>`;
+
+  citySelect.innerHTML =
+    `<option>불러오는 중...</option>`;
 
   try {
-    const response = await fetch(`${API_BASE}/regions`);
-    const data = await response.json();
 
-    if (data.status !== "success" || !data.regions) {
-      throw new Error("지역 데이터 오류");
-    }
+    const response =
+      await fetch(`${API_BASE}/regions`);
+
+    const data =
+      await response.json();
 
     regions = data.regions;
 
     provinceSelect.innerHTML = "";
 
     Object.keys(regions).forEach((province) => {
-      const option = document.createElement("option");
+
+      const option =
+        document.createElement("option");
+
       option.value = province;
       option.textContent = province;
+
       provinceSelect.appendChild(option);
     });
 
@@ -107,17 +159,19 @@ async function loadRegions() {
     );
 
   } catch (error) {
-    console.error("지역 목록 불러오기 실패:", error);
+
+    console.error(error);
 
     provinceSelect.innerHTML =
-      `<option>지역 불러오기 실패</option>`;
+      `<option>실패</option>`;
 
     citySelect.innerHTML =
-      `<option>지역 불러오기 실패</option>`;
+      `<option>실패</option>`;
   }
 }
 
 function updateCityOptions() {
+
   const province =
     document.getElementById("province").value;
 
@@ -127,13 +181,13 @@ function updateCityOptions() {
   citySelect.innerHTML = "";
 
   if (!regions[province]) {
-    citySelect.innerHTML =
-      `<option>시 목록 없음</option>`;
     return;
   }
 
   regions[province].forEach((city) => {
-    const option = document.createElement("option");
+
+    const option =
+      document.createElement("option");
 
     option.value = city;
     option.textContent = city;
@@ -143,7 +197,10 @@ function updateCityOptions() {
 }
 
 function initMap() {
-  map = L.map("map").setView([36.5, 127.8], 7);
+
+  map =
+    L.map("map")
+    .setView([36.5, 127.8], 7);
 
   L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -154,10 +211,10 @@ function initMap() {
 }
 
 function initLiveMap() {
-  liveMap = L.map("liveMap").setView(
-    [36.5, 127.8],
-    7
-  );
+
+  liveMap =
+    L.map("liveMap")
+    .setView([36.5, 127.8], 7);
 
   L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -168,48 +225,53 @@ function initLiveMap() {
 }
 
 function initChart() {
-  const ctx = document.getElementById("riskChart");
 
-  riskChart = new Chart(ctx, {
-    type: "bar",
+  const ctx =
+    document.getElementById("riskChart");
 
-    data: {
-      labels: [],
+  riskChart =
+    new Chart(ctx, {
 
-      datasets: [
-        {
-          label: "위험도",
-          data: [],
-          borderRadius: 12,
-          backgroundColor: "#ef4444"
-        }
-      ]
-    },
+      type: "bar",
 
-    options: {
-      responsive: true,
+      data: {
 
-      plugins: {
-        legend: {
-          display: false
-        }
+        labels: [],
+
+        datasets: [
+          {
+            label: "위험도",
+            data: [],
+            borderRadius: 12,
+            backgroundColor: "#ef4444"
+          }
+        ]
       },
 
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100
+      options: {
+
+        responsive: true,
+
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
         }
       }
-    }
-  });
+    });
 }
 
-function toggleRealtimeMode() {
-  realtimeMode = !realtimeMode;
+function changeMode() {
 
-  const btn =
-    document.getElementById("realtimeBtn");
+  const mode =
+    document.getElementById("modeSelect").value;
 
   const dateInput =
     document.getElementById("date");
@@ -217,67 +279,79 @@ function toggleRealtimeMode() {
   const timeInput =
     document.getElementById("time");
 
-  if (realtimeMode) {
-    btn.classList.add("active");
-    btn.innerText = "실시간 ON";
+  if (mode === "realtime") {
+
+    realtimeMode = true;
 
     dateInput.disabled = true;
     timeInput.disabled = true;
 
-    setMainMap("live");
-
     startRealtimeMode();
 
+    setMainMap("live");
+
   } else {
-    btn.classList.remove("active");
-    btn.innerText = "실시간";
+
+    realtimeMode = false;
 
     dateInput.disabled = false;
     timeInput.disabled = false;
 
     clearInterval(liveTimer);
+
+    resetMapLayout();
   }
 }
 
 function startRealtimeMode() {
+
   runRealtimePrediction();
 
   clearInterval(liveTimer);
 
-  liveTimer = setInterval(() => {
-    runRealtimePrediction();
-  }, 5 * 60 * 1000);
+  liveTimer =
+    setInterval(
+      runRealtimePrediction,
+      300000
+    );
 }
 
 async function runRealtimePrediction() {
+
   const province =
     document.getElementById("province").value;
 
   const city =
     document.getElementById("city").value;
 
-  const now = getCurrentDateTime();
+  const now =
+    getCurrentDateTime();
 
   try {
-    const response = await fetch(`${API_BASE}/predict`, {
-      method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+    const response =
+      await fetch(`${API_BASE}/predict`, {
 
-      body: JSON.stringify({
-        date: now.date,
-        time: now.time,
-        province: province,
-        city: city,
-        max_points: 20
-      })
-    });
+        method: "POST",
 
-    const data = await response.json();
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-    const results = data.results;
+        body: JSON.stringify({
+          date: now.date,
+          time: now.time,
+          province,
+          city,
+          max_points: 20
+        })
+      });
+
+    const data =
+      await response.json();
+
+    const results =
+      data.results;
 
     if (!results || results.length === 0) {
       return;
@@ -285,9 +359,13 @@ async function runRealtimePrediction() {
 
     results.sort(
       (a, b) =>
-        Number(b.blackice_probability_percent || 0)
+        Number(
+          b.blackice_probability_percent || 0
+        )
         -
-        Number(a.blackice_probability_percent || 0)
+        Number(
+          a.blackice_probability_percent || 0
+        )
     );
 
     updateAverageCards(results);
@@ -304,16 +382,12 @@ async function runRealtimePrediction() {
       `실시간 업데이트: ${now.date} ${now.time}`;
 
   } catch (error) {
+
     console.error(error);
   }
 }
 
 async function predictRisk() {
-
-  if (realtimeMode) {
-    alert("실시간 모드를 끄고 사용해주세요.");
-    return;
-  }
 
   const date =
     document.getElementById("date").value;
@@ -327,65 +401,89 @@ async function predictRisk() {
   const city =
     document.getElementById("city").value;
 
-  if (!date || !time) {
-    alert("날짜와 시간을 선택해주세요.");
-    return;
+  if (!realtimeMode) {
+
+    if (!date || !time) {
+
+      alert("날짜와 시간을 선택해주세요.");
+
+      return;
+    }
   }
 
   try {
-    const response = await fetch(`${API_BASE}/predict`, {
-      method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
+    const bodyData =
+      realtimeMode
+      ?
+      {
+        ...getCurrentDateTime(),
+        province,
+        city,
+        max_points: 20
+      }
+      :
+      {
         date,
         time,
         province,
         city,
         max_points: 20
-      })
-    });
+      };
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    const response =
+      await fetch(`${API_BASE}/predict`, {
 
-      console.error(errorText);
+        method: "POST",
 
-      alert(errorText);
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-      return;
-    }
+        body: JSON.stringify(bodyData)
+      });
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    const results = data.results;
+    const results =
+      data.results;
 
     if (!results || results.length === 0) {
+
       alert("결과 없음");
+
       return;
     }
 
     results.sort(
       (a, b) =>
-        Number(b.blackice_probability_percent || 0)
+        Number(
+          b.blackice_probability_percent || 0
+        )
         -
-        Number(a.blackice_probability_percent || 0)
+        Number(
+          a.blackice_probability_percent || 0
+        )
     );
 
     updateAverageCards(results);
 
-    updateMap(results);
+    if (realtimeMode) {
+
+      updateLiveMap(results);
+
+    } else {
+
+      updateMap(results);
+    }
 
     updateChart(results);
 
     updateTable(results);
 
-    setMainMap("selected");
-
   } catch (error) {
+
     console.error(error);
 
     alert("예측 실패");
@@ -394,46 +492,95 @@ async function predictRisk() {
 
 function setMainMap(type) {
 
-  const grid =
-    document.getElementById("mapCompareGrid");
+  const selected =
+    document.querySelector(".selected-panel");
 
-  if (type === "live") {
-    grid.classList.remove("selected-main");
-    grid.classList.add("live-main");
+  const live =
+    document.querySelector(".live-panel");
+
+  selected.classList.remove(
+    "large",
+    "small"
+  );
+
+  live.classList.remove(
+    "large",
+    "small"
+  );
+
+  if (type === "selected") {
+
+    selected.classList.add("large");
+    live.classList.add("small");
 
   } else {
 
-    grid.classList.remove("live-main");
-    grid.classList.add("selected-main");
+    live.classList.add("large");
+    selected.classList.add("small");
   }
 
   setTimeout(() => {
+
     map.invalidateSize();
+
     liveMap.invalidateSize();
-  }, 350);
+
+  }, 300);
+}
+
+function resetMapLayout() {
+
+  const selected =
+    document.querySelector(".selected-panel");
+
+  const live =
+    document.querySelector(".live-panel");
+
+  selected.classList.remove(
+    "large",
+    "small"
+  );
+
+  live.classList.remove(
+    "large",
+    "small"
+  );
+
+  setTimeout(() => {
+
+    map.invalidateSize();
+
+    liveMap.invalidateSize();
+
+  }, 300);
 }
 
 function getCurrentDateTime() {
 
   const now = new Date();
 
-  const yyyy = now.getFullYear();
+  const yyyy =
+    now.getFullYear();
 
   const mm =
-    String(now.getMonth() + 1)
-    .padStart(2, "0");
+    String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
 
   const dd =
-    String(now.getDate())
-    .padStart(2, "0");
+    String(
+      now.getDate()
+    ).padStart(2, "0");
 
   const hh =
-    String(now.getHours())
-    .padStart(2, "0");
+    String(
+      now.getHours()
+    ).padStart(2, "0");
 
   const mi =
-    String(now.getMinutes())
-    .padStart(2, "0");
+    String(
+      now.getMinutes()
+    ).padStart(2, "0");
 
   return {
     date: `${yyyy}-${mm}-${dd}`,
@@ -441,17 +588,22 @@ function getCurrentDateTime() {
   };
 }
 
-function formatValue(value, unit = "") {
+function average(values) {
 
-  if (
-    value === null ||
-    value === undefined ||
-    Number.isNaN(Number(value))
-  ) {
-    return "정보 없음";
+  const nums =
+    values
+    .map(v => Number(v))
+    .filter(v => !Number.isNaN(v));
+
+  if (nums.length === 0) {
+    return null;
   }
 
-  return Number(value).toFixed(1) + unit;
+  return (
+    nums.reduce((a, b) => a + b, 0)
+    /
+    nums.length
+  );
 }
 
 function formatPercent(value) {
@@ -467,29 +619,17 @@ function formatPercent(value) {
   return Number(value).toFixed(1) + "%";
 }
 
-function average(values) {
+function formatValue(value, unit="") {
 
-  const nums = values
-    .map(v => Number(v))
-    .filter(v => !Number.isNaN(v));
-
-  if (nums.length === 0) {
-    return null;
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(Number(value))
+  ) {
+    return "정보 없음";
   }
 
-  const sum =
-    nums.reduce((a, b) => a + b, 0);
-
-  return sum / nums.length;
-}
-
-function getAverageRiskLevel(avgRisk) {
-
-  if (avgRisk >= 80) return "매우 위험";
-  if (avgRisk >= 60) return "위험";
-  if (avgRisk >= 30) return "주의";
-
-  return "낮음";
+  return Number(value).toFixed(1) + unit;
 }
 
 function updateAverageCards(results) {
@@ -509,13 +649,19 @@ function updateAverageCards(results) {
     );
 
   const avgTemp =
-    average(results.map(r => r.기온));
+    average(
+      results.map(r => r.기온)
+    );
 
   const avgHumidity =
-    average(results.map(r => r.습도));
+    average(
+      results.map(r => r.습도)
+    );
 
   const avgWind =
-    average(results.map(r => r.풍속));
+    average(
+      results.map(r => r.풍속)
+    );
 
   document.getElementById("mainRisk").innerText =
     formatPercent(avgBlackice);
@@ -533,8 +679,7 @@ function updateAverageCards(results) {
     formatValue(avgWind, "m/s");
 
   document.getElementById("riskLevel").innerText =
-    "지역 평균 " +
-    getAverageRiskLevel(avgBlackice);
+    "지역 평균 위험";
 }
 
 function getRiskColorByPercent(percent) {
@@ -542,15 +687,13 @@ function getRiskColorByPercent(percent) {
   const p =
     Math.max(
       0,
-      Math.min(
-        100,
-        Number(percent) || 0
-      )
+      Math.min(100, Number(percent))
     );
 
-  const hue = 120 - (p * 1.2);
+  const hue =
+    120 - (p * 1.2);
 
-  return `hsl(${hue}, 85%, 48%)`;
+  return `hsl(${hue},85%,48%)`;
 }
 
 function updateMap(results) {
@@ -563,15 +706,11 @@ function updateMap(results) {
 
   results.forEach((r) => {
 
-    const lat = Number(r["위도"]);
-    const lon = Number(r["경도"]);
+    const lat =
+      Number(r["위도"]);
 
-    if (
-      Number.isNaN(lat) ||
-      Number.isNaN(lon)
-    ) {
-      return;
-    }
+    const lon =
+      Number(r["경도"]);
 
     const color =
       getRiskColorByPercent(
@@ -591,9 +730,9 @@ function updateMap(results) {
       .addTo(map)
       .bindPopup(`
         <b>
-        ${r.시도 || ""}
-        ${r.시군구 || ""}
-        ${r.읍면동 || ""}
+        ${r.시도}
+        ${r.시군구}
+        ${r.읍면동}
         </b><br>
 
         위험도:
@@ -607,14 +746,11 @@ function updateMap(results) {
         )}
       `);
 
-    marker.on("click", () => {
-      setMainMap("selected");
-    });
-
     markers.push(marker);
   });
 
   if (markers.length > 0) {
+
     const group =
       L.featureGroup(markers);
 
@@ -634,15 +770,11 @@ function updateLiveMap(results) {
 
   results.forEach((r) => {
 
-    const lat = Number(r["위도"]);
-    const lon = Number(r["경도"]);
+    const lat =
+      Number(r["위도"]);
 
-    if (
-      Number.isNaN(lat) ||
-      Number.isNaN(lon)
-    ) {
-      return;
-    }
+    const lon =
+      Number(r["경도"]);
 
     const color =
       getRiskColorByPercent(
@@ -659,23 +791,7 @@ function updateLiveMap(results) {
           fillOpacity: 0.85
         }
       )
-      .addTo(liveMap)
-      .bindPopup(`
-        <b>
-        ${r.시도 || ""}
-        ${r.시군구 || ""}
-        ${r.읍면동 || ""}
-        </b><br>
-
-        실시간 위험도:
-        ${formatPercent(
-          r.blackice_probability_percent
-        )}
-      `);
-
-    marker.on("click", () => {
-      setMainMap("live");
-    });
+      .addTo(liveMap);
 
     liveMarkers.push(marker);
   });
@@ -693,13 +809,6 @@ function updateLiveMap(results) {
 
 function zoomToLocation(lat, lon) {
 
-  if (
-    Number.isNaN(lat) ||
-    Number.isNaN(lon)
-  ) {
-    return;
-  }
-
   map.setView(
     [lat, lon],
     15,
@@ -714,21 +823,16 @@ function zoomToLocation(lat, lon) {
 
 function updateChart(results) {
 
-  const top = results.slice(0, 7);
+  const top =
+    results.slice(0, 7);
 
   riskChart.data.labels =
-    top.map((r, i) =>
-      r.읍면동
-      ?
-      r.읍면동
-      :
-      `지점 ${i + 1}`
-    );
+    top.map(r => r.읍면동);
 
   riskChart.data.datasets[0].data =
-    top.map((r) =>
-      Number(
-        r.blackice_probability_percent || 0
+    top.map(
+      r => Number(
+        r.blackice_probability_percent
       ).toFixed(1)
     );
 
@@ -738,28 +842,28 @@ function updateChart(results) {
     .getElementById("riskChart")
     .onclick = function(evt) {
 
-    const points =
-      riskChart.getElementsAtEventForMode(
-        evt,
-        "nearest",
-        { intersect: true },
-        true
-      );
+      const points =
+        riskChart.getElementsAtEventForMode(
+          evt,
+          "nearest",
+          { intersect: true },
+          true
+        );
 
-    if (points.length) {
+      if (points.length) {
 
-      const index =
-        points[0].index;
+        const index =
+          points[0].index;
 
-      const selected =
-        top[index];
+        const selected =
+          top[index];
 
-      zoomToLocation(
-        Number(selected["위도"]),
-        Number(selected["경도"])
-      );
-    }
-  };
+        zoomToLocation(
+          Number(selected["위도"]),
+          Number(selected["경도"])
+        );
+      }
+    };
 }
 
 function updateTable(results) {
@@ -773,39 +877,42 @@ function updateTable(results) {
     .slice(0, 10)
     .forEach((r, i) => {
 
-    const row =
-      document.createElement("tr");
+      const row =
+        document.createElement("tr");
 
-    row.innerHTML = `
-      <td>${i + 1}</td>
+      row.innerHTML = `
+        <td>${i + 1}</td>
 
-      <td>
-        ${r.시도 || ""}
-        ${r.시군구 || ""}
-        ${r.읍면동 || ""}
-      </td>
+        <td>
+          ${r.시도}
+          ${r.시군구}
+          ${r.읍면동}
+        </td>
 
-      <td>
-        ${formatPercent(
-          r.blackice_probability_percent
-        )}
-      </td>
+        <td>
+          ${formatPercent(
+            r.blackice_probability_percent
+          )}
+        </td>
 
-      <td>
-        ${formatPercent(
-          r.icing_probability_percent
-        )}
-      </td>
-    `;
+        <td>
+          ${formatPercent(
+            r.icing_probability_percent
+          )}
+        </td>
+      `;
 
-    row.addEventListener("click", () => {
+      row.addEventListener(
+        "click",
+        () => {
 
-      zoomToLocation(
-        Number(r["위도"]),
-        Number(r["경도"])
+          zoomToLocation(
+            Number(r["위도"]),
+            Number(r["경도"])
+          );
+        }
       );
-    });
 
-    tbody.appendChild(row);
-  });
+      tbody.appendChild(row);
+    });
 }
