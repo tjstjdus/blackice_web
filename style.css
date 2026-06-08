@@ -507,3 +507,14 @@ tbody tr:hover {
   height: 720px !important;
 }
 
+.control-card {
+  padding-left: 48px !important;
+  padding-right: 48px !important;
+  column-gap: 22px !important;
+}
+
+.control-card .field,
+.control-card button {
+  margin-left: 6px !important;
+  margin-right: 6px !important;
+}
