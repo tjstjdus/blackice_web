@@ -432,3 +432,52 @@ tbody tr:hover {
 .map-size-controls {
   justify-content: center;
 }
+/* 축소 지도 카드 내부 여백 줄이기 */
+.map-compare-grid.selected-large .live-panel,
+.map-compare-grid.live-large .selected-panel {
+  padding: 22px !important;
+}
+
+/* 축소 지도 제목/지역명/범례를 같은 비율로 축소 */
+.map-compare-grid.selected-large .live-panel .section-top h2,
+.map-compare-grid.live-large .selected-panel .section-top h2 {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+}
+
+.map-compare-grid.selected-large .live-panel .map-subtitle,
+.map-compare-grid.live-large .selected-panel .map-subtitle {
+  font-size: 20px !important;
+  line-height: 1.25 !important;
+  margin-top: 12px !important;
+  word-break: keep-all;
+}
+
+.map-compare-grid.selected-large .live-panel .eyebrow,
+.map-compare-grid.live-large .selected-panel .eyebrow {
+  font-size: 11px !important;
+}
+
+.map-compare-grid.selected-large .live-panel .legend,
+.map-compare-grid.live-large .selected-panel .legend {
+  font-size: 11px !important;
+  gap: 6px !important;
+}
+
+.map-compare-grid.selected-large .live-panel .gradient-bar,
+.map-compare-grid.live-large .selected-panel .gradient-bar {
+  width: 76px !important;
+}
+
+/* 축소 지도 높이도 너무 길지 않게 */
+.map-compare-grid.selected-large .live-panel #liveMap,
+.map-compare-grid.live-large .selected-panel #map {
+  height: 620px !important;
+}
+
+/* 확대 지도는 넓고 안정적으로 */
+.map-compare-grid.selected-large .selected-panel #map,
+.map-compare-grid.live-large .live-panel #liveMap {
+  height: 720px !important;
+}
