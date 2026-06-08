@@ -810,16 +810,32 @@ function updateLiveMap(results) {
 
 function zoomToLocation(lat, lon) {
 
-  map.setView(
-    [lat, lon],
-    15,
-    {
-      animate: true,
-      duration: 1.5
-    }
-  );
+  if (realtimeMode) {
 
-  setMainMap("selected");
+    liveMap.setView(
+      [lat, lon],
+      15,
+      {
+        animate: true,
+        duration: 1.5
+      }
+    );
+
+    setMainMap("live");
+
+  } else {
+
+    map.setView(
+      [lat, lon],
+      15,
+      {
+        animate: true,
+        duration: 1.5
+      }
+    );
+
+    setMainMap("selected");
+  }
 }
 
 function updateChart(results) {
