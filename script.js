@@ -1,13 +1,20 @@
 const API_BASE = "https://blackice-server-prjr.onrender.com";
 
 let map;
+let liveMap;
+
 let markers = [];
+let liveMarkers = [];
+
 let riskChart;
 let regions = {};
+
+let liveTimer = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     initMap();
+    initLiveMap();
     initChart();
     await loadRegions();
   } catch (error) {
@@ -76,6 +83,14 @@ function initMap() {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18
   }).addTo(map);
+}
+
+function initLiveMap() {
+  liveMap = L.map("liveMap").setView([36.5, 127.8], 7);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18
+  }).addTo(liveMap);
 }
 
 function initChart() {
@@ -157,9 +172,84 @@ async function predictRisk() {
     updateChart(results);
     updateTable(results);
 
+    startLiveRiskUpdate(province, city);
+
   } catch (error) {
     console.error("예측 요청 실패:", error);
     alert("예측 요청 실패: " + error.message);
+  }
+}
+
+function getCurrentDateTime() {
+  const now = new Date();
+
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mi = String(now.getMinutes()).padStart(2, "0");
+
+  return {
+    date: `${yyyy}-${mm}-${dd}`,
+    time: `${hh}:${mi}`
+  };
+}
+
+function startLiveRiskUpdate(province, city) {
+  updateLiveRiskMap(province, city);
+
+  if (liveTimer) {
+    clearInterval(liveTimer);
+  }
+
+  liveTimer = setInterval(() => {
+    updateLiveRiskMap(province, city);
+  }, 5 * 60 * 1000);
+}
+
+async function updateLiveRiskMap(province, city) {
+  const now = getCurrentDateTime();
+
+  try {
+    const response = await fetch(`${API_BASE}/predict`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        date: now.date,
+        time: now.time,
+        province: province,
+        city: city,
+        max_points: 20
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("실시간 지도 API 오류:", errorText);
+      return;
+    }
+
+    const data = await response.json();
+    const results = data.results;
+
+    if (!results || results.length === 0) {
+      return;
+    }
+
+    results.sort((a, b) =>
+      Number(b.blackice_probability_percent || 0) -
+      Number(a.blackice_probability_percent || 0)
+    );
+
+    updateLiveMap(results);
+
+    document.getElementById("liveUpdatedAt").innerText =
+      `현재 기상 API 기준 업데이트: ${now.date} ${now.time}`;
+
+  } catch (error) {
+    console.error("실시간 지도 업데이트 실패:", error);
   }
 }
 
@@ -243,11 +333,12 @@ function updateAverageCards(results) {
     "지역 평균 " + getAverageRiskLevel(avgBlackice);
 }
 
-function getRiskColor(level) {
-  if (level === "매우 위험") return "#ff3b30";
-  if (level === "위험") return "#ff9500";
-  if (level === "주의") return "#ffcc00";
-  return "#007aff";
+function getRiskColorByPercent(percent) {
+  const p = Math.max(0, Math.min(100, Number(percent) || 0));
+
+  const hue = 120 - (p * 1.2);
+
+  return `hsl(${hue}, 85%, 48%)`;
 }
 
 function updateMap(results) {
@@ -262,7 +353,7 @@ function updateMap(results) {
       return;
     }
 
-    const color = getRiskColor(r.risk_level);
+    const color = getRiskColorByPercent(r.blackice_probability_percent);
 
     const marker = L.circleMarker([lat, lon], {
       radius: 8,
@@ -286,6 +377,45 @@ function updateMap(results) {
   if (markers.length > 0) {
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.2));
+  }
+}
+
+function updateLiveMap(results) {
+  liveMarkers.forEach(marker => liveMap.removeLayer(marker));
+  liveMarkers = [];
+
+  results.forEach((r) => {
+    const lat = Number(r["위도"]);
+    const lon = Number(r["경도"]);
+
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+      return;
+    }
+
+    const color = getRiskColorByPercent(r.blackice_probability_percent);
+
+    const marker = L.circleMarker([lat, lon], {
+      radius: 8,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.85
+    })
+      .addTo(liveMap)
+      .bindPopup(`
+        <b>${r.시도 || ""} ${r.시군구 || ""} ${r.읍면동 || ""}</b><br>
+        실시간 위험도: ${formatPercent(r.blackice_probability_percent)}<br>
+        결빙확률: ${formatPercent(r.icing_probability_percent)}<br>
+        기온: ${formatValue(r.기온, "℃")}<br>
+        습도: ${formatValue(r.습도, "%")}<br>
+        풍속: ${formatValue(r.풍속, "m/s")}
+      `);
+
+    liveMarkers.push(marker);
+  });
+
+  if (liveMarkers.length > 0) {
+    const group = L.featureGroup(liveMarkers);
+    liveMap.fitBounds(group.getBounds().pad(0.2));
   }
 }
 
