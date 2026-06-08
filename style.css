@@ -415,3 +415,63 @@ tbody tr:hover {
     white-space: normal;
   }
 }
+
+/* 전체 웹 폭 통일 */
+.control-card,
+.dashboard,
+.content-grid,
+.map-size-controls,
+.table-section,
+.chart-section {
+  max-width: 1500px;
+}
+
+/* 지도 세로폭 확대 */
+#map,
+#liveMap {
+  height: 680px;
+}
+
+/* 축소된 지도는 제목도 작게 */
+.map-panel.small .section-top h2 {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  white-space: normal;
+}
+
+.map-panel.small .section-top small {
+  font-size: 12px;
+}
+
+.map-panel.small .eyebrow {
+  font-size: 12px;
+}
+
+/* 확대/축소 비율 정리 */
+.map-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+}
+
+.map-compare-grid.selected-large {
+  grid-template-columns: 2.8fr 0.7fr;
+}
+
+.map-compare-grid.live-large {
+  grid-template-columns: 0.7fr 2.8fr;
+}
+
+/* 지도 카드 안쪽 여백 정리 */
+.map-card {
+  padding: 36px;
+}
+
+/* 작은 지도에서 범례도 축소 */
+.map-panel.small .gradient-bar {
+  width: 90px;
+}
+
+.map-panel.small .legend {
+  font-size: 12px;
+}
