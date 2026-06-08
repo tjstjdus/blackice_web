@@ -32,9 +32,7 @@
 
 <section class="hero">
 
-  <p class="eyebrow">
-    Real-time AI prediction
-  </p>
+  <p class="eyebrow">Real-time AI prediction</p>
 
   <h1>
     도로 위 보이지 않는 위험을<br>
@@ -55,6 +53,13 @@
     <div class="field">
       <label>시간</label>
       <input type="time" id="time">
+    </div>
+
+    <div class="field realtime-field">
+      <label>모드</label>
+      <button type="button" id="realtimeBtn" onclick="toggleRealtimeMode()">
+        실시간
+      </button>
     </div>
 
     <div class="field">
@@ -104,13 +109,14 @@
 
 </section>
 
-<section class="content-grid map-compare-grid">
+<section class="content-grid map-compare-grid selected-main" id="mapCompareGrid">
 
-  <div class="map-card">
+  <div class="map-card map-panel selected-panel" onclick="setMainMap('selected')">
 
     <div class="section-top">
-      <p class="eyebrow">Selected time risk map</p>
-      <h2>선택 시각 블랙아이스 사고 위험 지도</h2>
+      <p class="eyebrow">Reference time risk map</p>
+      <h2>기준시각 블랙아이스 사고 위험 지도</h2>
+      <small>선택한 날짜·시간 기준 예측 결과</small>
     </div>
 
     <div class="legend gradient-legend">
@@ -123,7 +129,7 @@
 
   </div>
 
-  <div class="map-card">
+  <div class="map-card map-panel live-panel" onclick="setMainMap('live')">
 
     <div class="section-top">
       <p class="eyebrow">Real-time risk map</p>
@@ -143,6 +149,32 @@
 
 </section>
 
+<section class="table-section">
+
+  <div class="section-top">
+    <p class="eyebrow">Result</p>
+    <h2>위험 지점 리스트</h2>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>순위</th>
+        <th>상세 위치</th>
+        <th>위험도</th>
+        <th>결빙확률</th>
+      </tr>
+    </thead>
+
+    <tbody id="resultTable">
+      <tr>
+        <td colspan="4">예측 결과가 표시됩니다.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</section>
+
 <section class="content-grid">
 
   <div class="chart-card">
@@ -155,33 +187,6 @@
     <canvas id="riskChart"></canvas>
 
   </div>
-
-</section>
-
-<section class="table-section">
-
-  <div class="section-top">
-    <p class="eyebrow">Result</p>
-    <h2>위험 지점 리스트</h2>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>순위</th>
-        <th>시도</th>
-        <th>시군구</th>
-        <th>위험도</th>
-        <th>결빙확률</th>
-      </tr>
-    </thead>
-
-    <tbody id="resultTable">
-      <tr>
-        <td colspan="5">예측 결과가 표시됩니다.</td>
-      </tr>
-    </tbody>
-  </table>
 
 </section>
 
