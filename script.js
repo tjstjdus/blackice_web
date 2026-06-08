@@ -471,13 +471,14 @@ async function predictRisk() {
 
     if (realtimeMode) {
 
-      updateLiveMap(results);
-
-    } else {
-
-      updateMap(results);
-    }
-
+    updateLiveMap(results);
+  
+  } else {
+  
+    updateMap(results);
+  
+    updateLiveMap(results);
+  }
     updateChart(results);
 
     updateTable(results);
