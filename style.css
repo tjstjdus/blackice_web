@@ -215,7 +215,7 @@ button:active {
 }
 
 .content-grid {
-  max-width: 1180px;
+  max-width: 1600px;
   margin: 0 auto 36px;
   padding: 0 24px;
 }
@@ -232,11 +232,11 @@ button:active {
 }
 
 .map-panel.large {
-  flex: 3;
+  flex: 4.2;
 }
 
 .map-panel.small {
-  flex: 0.45;
+  flex: 0.28;
 }
 
 .map-card,
