@@ -399,3 +399,36 @@ tbody tr:hover {
     height: 520px;
   }
 }
+
+:root {
+  --page-width: 1500px;
+  --page-padding: 32px;
+}
+
+.control-card,
+.dashboard,
+.map-size-controls,
+.content-grid,
+.table-section,
+.chart-section {
+  width: min(var(--page-width), calc(100% - var(--page-padding) * 2)) !important;
+  max-width: none !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.table-section,
+.chart-card {
+  padding: 34px !important;
+}
+
+.content-grid {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.map-size-controls {
+  justify-content: center;
+}
