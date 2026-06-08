@@ -560,3 +560,12 @@ tbody tr:hover {
 .chart-card {
   width: 100% !important;
 }
+.control-card,
+.dashboard,
+.map-size-controls,
+.content-grid,
+.table-section,
+.chart-section {
+  max-width: 1500px !important;
+  width: 100%;
+}
