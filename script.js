@@ -238,6 +238,18 @@ async function runRealtimePrediction() {
     updateChart(results);
     updateTable(results);
 
+    document.getElementById(
+      "selectedMapSub"
+    ).innerText =
+      realtimeMode
+        ? `${province} ${city} · 실시간 기준`
+        : `${province} ${city} · ${date} ${time}`;
+    
+    document.getElementById(
+      "liveMapSub"
+    ).innerText =
+      `${province} ${city} · 실시간 기준`;
+
     setMainMap("live");
 
     document.getElementById("liveUpdatedAt").innerText =
