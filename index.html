@@ -46,6 +46,14 @@
   <div class="control-card">
 
     <div class="field">
+      <label>예측 모드</label>
+      <select id="modeSelect" onchange="changeMode()">
+        <option value="predict">날짜·시간 선택</option>
+        <option value="realtime">실시간</option>
+      </select>
+    </div>
+
+    <div class="field">
       <label>날짜</label>
       <input type="date" id="date">
     </div>
@@ -53,13 +61,6 @@
     <div class="field">
       <label>시간</label>
       <input type="time" id="time">
-    </div>
-
-    <div class="field realtime-field">
-      <label>모드</label>
-      <button type="button" id="realtimeBtn" onclick="toggleRealtimeMode()">
-        실시간
-      </button>
     </div>
 
     <div class="field">
@@ -109,7 +110,13 @@
 
 </section>
 
-<section class="content-grid map-compare-grid selected-main" id="mapCompareGrid">
+<div class="map-size-controls">
+  <button onclick="setMainMap('selected')">기준시각 확대</button>
+  <button onclick="setMainMap('live')">실시간 확대</button>
+  <button onclick="resetMapLayout()">반반 보기</button>
+</div>
+
+<section class="content-grid map-compare-grid" id="mapCompareGrid">
 
   <div class="map-card map-panel selected-panel" onclick="setMainMap('selected')">
 
@@ -175,7 +182,7 @@
 
 </section>
 
-<section class="content-grid">
+<section class="chart-section">
 
   <div class="chart-card">
 
