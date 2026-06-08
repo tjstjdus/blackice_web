@@ -372,3 +372,8 @@ td {
     white-space: normal;
   }
 }
+.section-top h2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
