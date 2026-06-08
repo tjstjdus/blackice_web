@@ -226,7 +226,9 @@ async function runRealtimePrediction() {
     const data = await response.json();
     const results = data.results;
 
-    if (!results || results.length === 0) return;
+    if (!results || results.length === 0) {
+      return;
+    }
 
     results.sort((a, b) =>
       Number(b.blackice_probability_percent || 0) -
@@ -238,17 +240,11 @@ async function runRealtimePrediction() {
     updateChart(results);
     updateTable(results);
 
-    document.getElementById(
-      "selectedMapSub"
-    ).innerText =
-      realtimeMode
-        ? `${province} ${city} · 실시간 기준`
-        : `${province} ${city} · ${date} ${time}`;
-    
-    document.getElementById(
-      "liveMapSub"
-    ).innerText =
-      `${province} ${city} · 실시간 기준`;
+    document.getElementById("selectedMapSub").innerText =
+      `${province} ${city} · 선택 시각 기준`;
+
+    document.getElementById("liveMapSub").innerText =
+      `${province} ${city} · 실시간 기준 ${now.date} ${now.time}`;
 
     setMainMap("live");
 
