@@ -332,9 +332,19 @@ function setMainMap(type) {
   }
 
   setTimeout(() => {
+
+  map.invalidateSize(true);
+  liveMap.invalidateSize(true);
+
+  map.eachLayer(function () {
     map.invalidateSize();
+  });
+
+  liveMap.eachLayer(function () {
     liveMap.invalidateSize();
-  }, 300);
+  });
+
+}, 500);
 }
 
 function resetMapLayout() {
@@ -345,9 +355,19 @@ function resetMapLayout() {
   live.classList.remove("large", "small");
 
   setTimeout(() => {
+
+  map.invalidateSize(true);
+  liveMap.invalidateSize(true);
+
+  map.eachLayer(function () {
     map.invalidateSize();
+  });
+
+  liveMap.eachLayer(function () {
     liveMap.invalidateSize();
-  }, 300);
+  });
+
+}, 500);
 }
 
 function getCurrentDateTime() {
