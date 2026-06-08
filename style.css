@@ -83,10 +83,30 @@ h1 {
   border: 1px solid #e5e5ea;
   border-radius: 30px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr) auto;
+  grid-template-columns:
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    auto;
+
+  width: min(1500px, calc(100% - 48px)) !important;
+
+  margin: 0 auto;
+
+  overflow: hidden;
   gap: 14px;
   align-items: end;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+}
+.field {
+  min-width: 0;
+}
+
+input,
+select {
+  min-width: 0;
 }
 
 .field {
