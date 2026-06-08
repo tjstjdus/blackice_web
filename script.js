@@ -318,13 +318,22 @@ async function predictRisk() {
 
 function setMainMap(type) {
   const grid = document.getElementById("mapCompareGrid");
+  const selected = document.querySelector(".selected-panel");
+  const live = document.querySelector(".live-panel");
 
   grid.classList.remove("selected-large", "live-large");
 
+  selected.classList.remove("large", "small");
+  live.classList.remove("large", "small");
+
   if (type === "selected") {
     grid.classList.add("selected-large");
+    selected.classList.add("large");
+    live.classList.add("small");
   } else {
     grid.classList.add("live-large");
+    live.classList.add("large");
+    selected.classList.add("small");
   }
 
   setTimeout(() => {
@@ -335,8 +344,13 @@ function setMainMap(type) {
 
 function resetMapLayout() {
   const grid = document.getElementById("mapCompareGrid");
+  const selected = document.querySelector(".selected-panel");
+  const live = document.querySelector(".live-panel");
 
   grid.classList.remove("selected-large", "live-large");
+
+  selected.classList.remove("large", "small");
+  live.classList.remove("large", "small");
 
   setTimeout(() => {
     map.invalidateSize(true);
@@ -605,7 +619,18 @@ function updateTable(results) {
 
     row.innerHTML = `
       <td>${i + 1}</td>
-      <td>${r.시도 || ""} ${r.시군구 || ""} ${r.읍면동 || ""}</td>
+
+      <td>
+        ${r.시도 || ""}
+        ${r.시군구 || ""}
+        ${r.읍면동 || ""}
+        <br>
+        <small>
+          위도 ${Number(r.위도).toFixed(5)},
+          경도 ${Number(r.경도).toFixed(5)}
+        </small>
+      </td>
+
       <td>${formatPercent(r.blackice_probability_percent)}</td>
       <td>${formatPercent(r.icing_probability_percent)}</td>
     `;
