@@ -10,6 +10,7 @@ let riskChart;
 let regions = {};
 
 let liveTimer = null;
+let realtimeMode = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -17,11 +18,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     initLiveMap();
     initChart();
     await loadRegions();
+    setDateLimit();
   } catch (error) {
     console.error("초기 실행 오류:", error);
     alert("초기 데이터를 불러오지 못했습니다.");
   }
 });
+
+function setDateLimit() {
+  const now = new Date();
+
+  const futureLimit = new Date(
+    now.getTime() + (6 * 60 * 60 * 1000)
+  );
+
+  const dateInput = document.getElementById("date");
+  const timeInput = document.getElementById("time");
+
+  const yyyy = futureLimit.getFullYear();
+  const mm = String(futureLimit.getMonth() + 1).padStart(2, "0");
+  const dd = String(futureLimit.getDate()).padStart(2, "0");
+
+  dateInput.max = `${yyyy}-${mm}-${dd}`;
+
+  timeInput.addEventListener("change", validateFutureTime);
+  dateInput.addEventListener("change", validateFutureTime);
+}
+
+function validateFutureTime() {
+  const dateInput = document.getElementById("date");
+  const timeInput = document.getElementById("time");
+
+  if (!dateInput.value || !timeInput.value) {
+    return;
+  }
+
+  const selected = new Date(
+    `${dateInput.value}T${timeInput.value}`
+  );
+
+  const now = new Date();
+
+  const futureLimit = new Date(
+    now.getTime() + (6 * 60 * 60 * 1000)
+  );
+
+  if (selected > futureLimit) {
+    alert("미래 예측은 현재 기준 6시간 이내만 가능합니다.");
+
+    const hh = String(futureLimit.getHours()).padStart(2, "0");
+    const mi = String(futureLimit.getMinutes()).padStart(2, "0");
+
+    timeInput.value = `${hh}:${mi}`;
+  }
+}
 
 async function loadRegions() {
   const provinceSelect = document.getElementById("province");
@@ -39,6 +89,7 @@ async function loadRegions() {
     }
 
     regions = data.regions;
+
     provinceSelect.innerHTML = "";
 
     Object.keys(regions).forEach((province) => {
@@ -49,30 +100,44 @@ async function loadRegions() {
     });
 
     updateCityOptions();
-    provinceSelect.addEventListener("change", updateCityOptions);
+
+    provinceSelect.addEventListener(
+      "change",
+      updateCityOptions
+    );
 
   } catch (error) {
     console.error("지역 목록 불러오기 실패:", error);
-    provinceSelect.innerHTML = `<option>지역 불러오기 실패</option>`;
-    citySelect.innerHTML = `<option>지역 불러오기 실패</option>`;
+
+    provinceSelect.innerHTML =
+      `<option>지역 불러오기 실패</option>`;
+
+    citySelect.innerHTML =
+      `<option>지역 불러오기 실패</option>`;
   }
 }
 
 function updateCityOptions() {
-  const province = document.getElementById("province").value;
-  const citySelect = document.getElementById("city");
+  const province =
+    document.getElementById("province").value;
+
+  const citySelect =
+    document.getElementById("city");
 
   citySelect.innerHTML = "";
 
   if (!regions[province]) {
-    citySelect.innerHTML = `<option>시 목록 없음</option>`;
+    citySelect.innerHTML =
+      `<option>시 목록 없음</option>`;
     return;
   }
 
   regions[province].forEach((city) => {
     const option = document.createElement("option");
+
     option.value = city;
     option.textContent = city;
+
     citySelect.appendChild(option);
   });
 }
@@ -80,17 +145,26 @@ function updateCityOptions() {
 function initMap() {
   map = L.map("map").setView([36.5, 127.8], 7);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18
-  }).addTo(map);
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 18
+    }
+  ).addTo(map);
 }
 
 function initLiveMap() {
-  liveMap = L.map("liveMap").setView([36.5, 127.8], 7);
+  liveMap = L.map("liveMap").setView(
+    [36.5, 127.8],
+    7
+  );
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18
-  }).addTo(liveMap);
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 18
+    }
+  ).addTo(liveMap);
 }
 
 function initChart() {
@@ -98,19 +172,29 @@ function initChart() {
 
   riskChart = new Chart(ctx, {
     type: "bar",
+
     data: {
       labels: [],
-      datasets: [{
-        label: "위험도",
-        data: [],
-        borderRadius: 12
-      }]
+
+      datasets: [
+        {
+          label: "위험도",
+          data: [],
+          borderRadius: 12,
+          backgroundColor: "#ef4444"
+        }
+      ]
     },
+
     options: {
       responsive: true,
+
       plugins: {
-        legend: { display: false }
+        legend: {
+          display: false
+        }
       },
+
       scales: {
         y: {
           beginAtZero: true,
@@ -121,101 +205,67 @@ function initChart() {
   });
 }
 
-async function predictRisk() {
-  const date = document.getElementById("date").value;
-  const time = document.getElementById("time").value;
-  const province = document.getElementById("province").value;
-  const city = document.getElementById("city").value;
+function toggleRealtimeMode() {
+  realtimeMode = !realtimeMode;
 
-  if (!date || !time) {
-    alert("날짜와 시간을 선택해주세요.");
-    return;
-  }
+  const btn =
+    document.getElementById("realtimeBtn");
 
-  try {
-    const response = await fetch(`${API_BASE}/predict`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        date: date,
-        time: time,
-        province: province,
-        city: city,
-        max_points: 20
-      })
-    });
+  const dateInput =
+    document.getElementById("date");
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("예측 API 오류:", errorText);
-      alert("예측 API 오류: " + errorText);
-      return;
-    }
+  const timeInput =
+    document.getElementById("time");
 
-    const data = await response.json();
-    const results = data.results;
+  if (realtimeMode) {
+    btn.classList.add("active");
+    btn.innerText = "실시간 ON";
 
-    if (!results || results.length === 0) {
-      alert("결과 없음");
-      return;
-    }
+    dateInput.disabled = true;
+    timeInput.disabled = true;
 
-    results.sort((a, b) =>
-      Number(b.blackice_probability_percent || 0) -
-      Number(a.blackice_probability_percent || 0)
-    );
+    setMainMap("live");
 
-    updateAverageCards(results);
-    updateMap(results);
-    updateChart(results);
-    updateTable(results);
+    startRealtimeMode();
 
-    startLiveRiskUpdate(province, city);
+  } else {
+    btn.classList.remove("active");
+    btn.innerText = "실시간";
 
-  } catch (error) {
-    console.error("예측 요청 실패:", error);
-    alert("예측 요청 실패: " + error.message);
-  }
-}
+    dateInput.disabled = false;
+    timeInput.disabled = false;
 
-function getCurrentDateTime() {
-  const now = new Date();
-
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mi = String(now.getMinutes()).padStart(2, "0");
-
-  return {
-    date: `${yyyy}-${mm}-${dd}`,
-    time: `${hh}:${mi}`
-  };
-}
-
-function startLiveRiskUpdate(province, city) {
-  updateLiveRiskMap(province, city);
-
-  if (liveTimer) {
     clearInterval(liveTimer);
   }
+}
+
+function startRealtimeMode() {
+  runRealtimePrediction();
+
+  clearInterval(liveTimer);
 
   liveTimer = setInterval(() => {
-    updateLiveRiskMap(province, city);
+    runRealtimePrediction();
   }, 5 * 60 * 1000);
 }
 
-async function updateLiveRiskMap(province, city) {
+async function runRealtimePrediction() {
+  const province =
+    document.getElementById("province").value;
+
+  const city =
+    document.getElementById("city").value;
+
   const now = getCurrentDateTime();
 
   try {
     const response = await fetch(`${API_BASE}/predict`, {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
+
       body: JSON.stringify({
         date: now.date,
         time: now.time,
@@ -225,36 +275,179 @@ async function updateLiveRiskMap(province, city) {
       })
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("실시간 지도 API 오류:", errorText);
-      return;
-    }
-
     const data = await response.json();
+
     const results = data.results;
 
     if (!results || results.length === 0) {
       return;
     }
 
-    results.sort((a, b) =>
-      Number(b.blackice_probability_percent || 0) -
-      Number(a.blackice_probability_percent || 0)
+    results.sort(
+      (a, b) =>
+        Number(b.blackice_probability_percent || 0)
+        -
+        Number(a.blackice_probability_percent || 0)
     );
+
+    updateAverageCards(results);
 
     updateLiveMap(results);
 
-    document.getElementById("liveUpdatedAt").innerText =
-      `현재 기상 API 기준 업데이트: ${now.date} ${now.time}`;
+    updateChart(results);
+
+    updateTable(results);
+
+    document.getElementById(
+      "liveUpdatedAt"
+    ).innerText =
+      `실시간 업데이트: ${now.date} ${now.time}`;
 
   } catch (error) {
-    console.error("실시간 지도 업데이트 실패:", error);
+    console.error(error);
   }
 }
 
+async function predictRisk() {
+
+  if (realtimeMode) {
+    alert("실시간 모드를 끄고 사용해주세요.");
+    return;
+  }
+
+  const date =
+    document.getElementById("date").value;
+
+  const time =
+    document.getElementById("time").value;
+
+  const province =
+    document.getElementById("province").value;
+
+  const city =
+    document.getElementById("city").value;
+
+  if (!date || !time) {
+    alert("날짜와 시간을 선택해주세요.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/predict`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        date,
+        time,
+        province,
+        city,
+        max_points: 20
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(errorText);
+
+      alert(errorText);
+
+      return;
+    }
+
+    const data = await response.json();
+
+    const results = data.results;
+
+    if (!results || results.length === 0) {
+      alert("결과 없음");
+      return;
+    }
+
+    results.sort(
+      (a, b) =>
+        Number(b.blackice_probability_percent || 0)
+        -
+        Number(a.blackice_probability_percent || 0)
+    );
+
+    updateAverageCards(results);
+
+    updateMap(results);
+
+    updateChart(results);
+
+    updateTable(results);
+
+    setMainMap("selected");
+
+  } catch (error) {
+    console.error(error);
+
+    alert("예측 실패");
+  }
+}
+
+function setMainMap(type) {
+
+  const grid =
+    document.getElementById("mapCompareGrid");
+
+  if (type === "live") {
+    grid.classList.remove("selected-main");
+    grid.classList.add("live-main");
+
+  } else {
+
+    grid.classList.remove("live-main");
+    grid.classList.add("selected-main");
+  }
+
+  setTimeout(() => {
+    map.invalidateSize();
+    liveMap.invalidateSize();
+  }, 350);
+}
+
+function getCurrentDateTime() {
+
+  const now = new Date();
+
+  const yyyy = now.getFullYear();
+
+  const mm =
+    String(now.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd =
+    String(now.getDate())
+    .padStart(2, "0");
+
+  const hh =
+    String(now.getHours())
+    .padStart(2, "0");
+
+  const mi =
+    String(now.getMinutes())
+    .padStart(2, "0");
+
+  return {
+    date: `${yyyy}-${mm}-${dd}`,
+    time: `${hh}:${mi}`
+  };
+}
+
 function formatValue(value, unit = "") {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(Number(value))
+  ) {
     return "정보 없음";
   }
 
@@ -262,7 +455,12 @@ function formatValue(value, unit = "") {
 }
 
 function formatPercent(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(Number(value))
+  ) {
     return "정보 없음";
   }
 
@@ -270,6 +468,7 @@ function formatPercent(value) {
 }
 
 function average(values) {
+
   const nums = values
     .map(v => Number(v))
     .filter(v => !Number.isNaN(v));
@@ -278,41 +477,45 @@ function average(values) {
     return null;
   }
 
-  const sum = nums.reduce((a, b) => a + b, 0);
+  const sum =
+    nums.reduce((a, b) => a + b, 0);
+
   return sum / nums.length;
 }
 
 function getAverageRiskLevel(avgRisk) {
-  if (avgRisk === null || avgRisk === undefined || Number.isNaN(Number(avgRisk))) {
-    return "정보 없음";
-  }
 
   if (avgRisk >= 80) return "매우 위험";
   if (avgRisk >= 60) return "위험";
   if (avgRisk >= 30) return "주의";
+
   return "낮음";
 }
 
 function updateAverageCards(results) {
-  const avgBlackice = average(
-    results.map(r => r.blackice_probability_percent)
-  );
 
-  const avgIcing = average(
-    results.map(r => r.icing_probability_percent)
-  );
+  const avgBlackice =
+    average(
+      results.map(
+        r => r.blackice_probability_percent
+      )
+    );
 
-  const avgTemp = average(
-    results.map(r => r.기온)
-  );
+  const avgIcing =
+    average(
+      results.map(
+        r => r.icing_probability_percent
+      )
+    );
 
-  const avgHumidity = average(
-    results.map(r => r.습도)
-  );
+  const avgTemp =
+    average(results.map(r => r.기온));
 
-  const avgWind = average(
-    results.map(r => r.풍속)
-  );
+  const avgHumidity =
+    average(results.map(r => r.습도));
+
+  const avgWind =
+    average(results.map(r => r.풍속));
 
   document.getElementById("mainRisk").innerText =
     formatPercent(avgBlackice);
@@ -330,11 +533,20 @@ function updateAverageCards(results) {
     formatValue(avgWind, "m/s");
 
   document.getElementById("riskLevel").innerText =
-    "지역 평균 " + getAverageRiskLevel(avgBlackice);
+    "지역 평균 " +
+    getAverageRiskLevel(avgBlackice);
 }
 
 function getRiskColorByPercent(percent) {
-  const p = Math.max(0, Math.min(100, Number(percent) || 0));
+
+  const p =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(percent) || 0
+      )
+    );
 
   const hue = 120 - (p * 1.2);
 
@@ -342,139 +554,257 @@ function getRiskColorByPercent(percent) {
 }
 
 function updateMap(results) {
-  markers.forEach(marker => map.removeLayer(marker));
+
+  markers.forEach(marker => {
+    map.removeLayer(marker);
+  });
+
   markers = [];
 
   results.forEach((r) => {
+
     const lat = Number(r["위도"]);
     const lon = Number(r["경도"]);
 
-    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    if (
+      Number.isNaN(lat) ||
+      Number.isNaN(lon)
+    ) {
       return;
     }
 
-    const color = getRiskColorByPercent(r.blackice_probability_percent);
+    const color =
+      getRiskColorByPercent(
+        r.blackice_probability_percent
+      );
 
-    const marker = L.circleMarker([lat, lon], {
-      radius: 8,
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.85
-    })
+    const marker =
+      L.circleMarker(
+        [lat, lon],
+        {
+          radius: 8,
+          color,
+          fillColor: color,
+          fillOpacity: 0.85
+        }
+      )
       .addTo(map)
       .bindPopup(`
-        <b>${r.시도 || ""} ${r.시군구 || ""} ${r.읍면동 || ""}</b><br>
-        위험도: ${formatPercent(r.blackice_probability_percent)}<br>
-        결빙확률: ${formatPercent(r.icing_probability_percent)}<br>
-        기온: ${formatValue(r.기온, "℃")}<br>
-        습도: ${formatValue(r.습도, "%")}<br>
-        풍속: ${formatValue(r.풍속, "m/s")}
+        <b>
+        ${r.시도 || ""}
+        ${r.시군구 || ""}
+        ${r.읍면동 || ""}
+        </b><br>
+
+        위험도:
+        ${formatPercent(
+          r.blackice_probability_percent
+        )}<br>
+
+        결빙확률:
+        ${formatPercent(
+          r.icing_probability_percent
+        )}
       `);
+
+    marker.on("click", () => {
+      setMainMap("selected");
+    });
 
     markers.push(marker);
   });
 
   if (markers.length > 0) {
-    const group = L.featureGroup(markers);
-    map.fitBounds(group.getBounds().pad(0.2));
+    const group =
+      L.featureGroup(markers);
+
+    map.fitBounds(
+      group.getBounds().pad(0.2)
+    );
   }
 }
 
 function updateLiveMap(results) {
-  liveMarkers.forEach(marker => liveMap.removeLayer(marker));
+
+  liveMarkers.forEach(marker => {
+    liveMap.removeLayer(marker);
+  });
+
   liveMarkers = [];
 
   results.forEach((r) => {
+
     const lat = Number(r["위도"]);
     const lon = Number(r["경도"]);
 
-    if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    if (
+      Number.isNaN(lat) ||
+      Number.isNaN(lon)
+    ) {
       return;
     }
 
-    const color = getRiskColorByPercent(r.blackice_probability_percent);
+    const color =
+      getRiskColorByPercent(
+        r.blackice_probability_percent
+      );
 
-    const marker = L.circleMarker([lat, lon], {
-      radius: 8,
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.85
-    })
+    const marker =
+      L.circleMarker(
+        [lat, lon],
+        {
+          radius: 8,
+          color,
+          fillColor: color,
+          fillOpacity: 0.85
+        }
+      )
       .addTo(liveMap)
       .bindPopup(`
-        <b>${r.시도 || ""} ${r.시군구 || ""} ${r.읍면동 || ""}</b><br>
-        실시간 위험도: ${formatPercent(r.blackice_probability_percent)}<br>
-        결빙확률: ${formatPercent(r.icing_probability_percent)}<br>
-        기온: ${formatValue(r.기온, "℃")}<br>
-        습도: ${formatValue(r.습도, "%")}<br>
-        풍속: ${formatValue(r.풍속, "m/s")}
+        <b>
+        ${r.시도 || ""}
+        ${r.시군구 || ""}
+        ${r.읍면동 || ""}
+        </b><br>
+
+        실시간 위험도:
+        ${formatPercent(
+          r.blackice_probability_percent
+        )}
       `);
+
+    marker.on("click", () => {
+      setMainMap("live");
+    });
 
     liveMarkers.push(marker);
   });
 
   if (liveMarkers.length > 0) {
-    const group = L.featureGroup(liveMarkers);
-    liveMap.fitBounds(group.getBounds().pad(0.2));
+
+    const group =
+      L.featureGroup(liveMarkers);
+
+    liveMap.fitBounds(
+      group.getBounds().pad(0.2)
+    );
   }
 }
 
+function zoomToLocation(lat, lon) {
+
+  if (
+    Number.isNaN(lat) ||
+    Number.isNaN(lon)
+  ) {
+    return;
+  }
+
+  map.setView(
+    [lat, lon],
+    15,
+    {
+      animate: true,
+      duration: 1.5
+    }
+  );
+
+  setMainMap("selected");
+}
+
 function updateChart(results) {
+
   const top = results.slice(0, 7);
 
-  riskChart.data.labels = top.map((r, i) =>
-    r.읍면동 ? r.읍면동 : `지점 ${i + 1}`
-  );
+  riskChart.data.labels =
+    top.map((r, i) =>
+      r.읍면동
+      ?
+      r.읍면동
+      :
+      `지점 ${i + 1}`
+    );
 
-  riskChart.data.datasets[0].data = top.map((r) =>
-    Number(r.blackice_probability_percent || 0).toFixed(1)
-  );
+  riskChart.data.datasets[0].data =
+    top.map((r) =>
+      Number(
+        r.blackice_probability_percent || 0
+      ).toFixed(1)
+    );
 
   riskChart.update();
 
-  document.getElementById("riskChart").onclick = function(evt) {
-    const points = riskChart.getElementsAtEventForMode(
-      evt,
-      "nearest",
-      { intersect: true },
-      true
-    );
+  document
+    .getElementById("riskChart")
+    .onclick = function(evt) {
+
+    const points =
+      riskChart.getElementsAtEventForMode(
+        evt,
+        "nearest",
+        { intersect: true },
+        true
+      );
 
     if (points.length) {
-      const index = points[0].index;
-      const selected = top[index];
 
-      const lat = Number(selected["위도"]);
-      const lon = Number(selected["경도"]);
+      const index =
+        points[0].index;
 
-      if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
-        map.setView([lat, lon], 15, {
-          animate: true,
-          duration: 1.5
-        });
+      const selected =
+        top[index];
 
-        if (markers[index]) {
-          markers[index].openPopup();
-        }
-      }
+      zoomToLocation(
+        Number(selected["위도"]),
+        Number(selected["경도"])
+      );
     }
   };
 }
 
 function updateTable(results) {
-  const tbody = document.getElementById("resultTable");
+
+  const tbody =
+    document.getElementById("resultTable");
+
   tbody.innerHTML = "";
 
-  results.slice(0, 10).forEach((r, i) => {
-    const row = document.createElement("tr");
+  results
+    .slice(0, 10)
+    .forEach((r, i) => {
+
+    const row =
+      document.createElement("tr");
 
     row.innerHTML = `
       <td>${i + 1}</td>
-      <td>${r.시도 || "-"}</td>
-      <td>${r.시군구 || "-"}</td>
-      <td>${formatPercent(r.blackice_probability_percent)}</td>
-      <td>${formatPercent(r.icing_probability_percent)}</td>
+
+      <td>
+        ${r.시도 || ""}
+        ${r.시군구 || ""}
+        ${r.읍면동 || ""}
+      </td>
+
+      <td>
+        ${formatPercent(
+          r.blackice_probability_percent
+        )}
+      </td>
+
+      <td>
+        ${formatPercent(
+          r.icing_probability_percent
+        )}
+      </td>
     `;
+
+    row.addEventListener("click", () => {
+
+      zoomToLocation(
+        Number(r["위도"]),
+        Number(r["경도"])
+      );
+    });
 
     tbody.appendChild(row);
   });
