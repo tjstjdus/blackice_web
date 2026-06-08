@@ -96,7 +96,7 @@ h1 {
   margin: 0 auto;
 
   overflow: hidden;
-  gap: 10px;
+  gap: 3px;
   align-items: end;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
 }
