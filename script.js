@@ -618,18 +618,16 @@ function updateTable(results) {
 
     row.innerHTML = `
       <td>${i + 1}</td>
-
+    
       <td>
-        ${r.시도 || ""}
-        ${r.시군구 || ""}
-        ${r.읍면동 || ""}
+        ${[r.시도, r.시군구, r.읍면동].filter(Boolean).join(" ")}
         <br>
         <small>
           위도 ${Number(r.위도).toFixed(5)},
           경도 ${Number(r.경도).toFixed(5)}
         </small>
       </td>
-
+    
       <td>${formatPercent(r.blackice_probability_percent)}</td>
       <td>${formatPercent(r.icing_probability_percent)}</td>
     `;
