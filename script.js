@@ -222,6 +222,17 @@ async function runRealtimePrediction() {
     });
 
     const data = await response.json();
+
+    if (data.status !== "success") {
+      console.warn(data.message || "실시간 예측 실패");
+      return;
+    }
+    
+    if (!data.results || data.results.length === 0) {
+      console.warn("실시간 결과 없음");
+      return;
+    }
+    
     const results = data.results;
 
     if (!results || results.length === 0) {
@@ -290,6 +301,17 @@ async function predictRisk() {
     });
 
     const data = await response.json();
+
+    if (data.status !== "success") {
+      alert(data.message || "예측 실패");
+      return;
+    }
+    
+    if (!data.results || data.results.length === 0) {
+      alert("결과 없음");
+      return;
+    }
+    
     const results = data.results;
 
     if (!results || results.length === 0) {
