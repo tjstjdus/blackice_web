@@ -1,87 +1,134 @@
-* {
-  box-sizing: border-box;
+/* =========================================
+   한국도로공사 블랙아이스 예측 시스템
+   Design System — Korea Expressway Corporation
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@600&display=swap');
+
+:root {
+  --red:        #ED1B2F;
+  --red-dark:   #C41525;
+  --blue:       #0071CE;
+  --blue-dark:  #005BAA;
+  --navy:       #101E8E;
+  --burgundy:   #80252A;
+  --gray-dark:  #808285;
+  --gray-light: #DBD9D6;
+  --text-main:  #1A1A1A;
+  --text-sub:   #333333;
+  --text-muted: #808285;
+  --bg-page:    #F5F5F5;
+  --bg-card:    #FFFFFF;
+  --border:     #DBD9D6;
+  --page-width: 1500px;
+  --page-padding: 32px;
+  --font-ko: 'Noto Sans KR', sans-serif;
+  --font-en: 'Barlow', sans-serif;
+  --font-data: 'Barlow Condensed', sans-serif;
 }
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  font-family: var(--font-ko);
+  background: var(--bg-page);
+  color: var(--text-sub);
 }
 
+/* ── Navigation ── */
 .nav {
-  height: 48px;
+  height: 60px;
   padding: 0 8%;
-  background: rgba(0, 0, 0, 0.88);
-  color: white;
+  background: var(--bg-card);
+  color: var(--text-main);
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 999;
-  backdrop-filter: blur(20px);
+  border-bottom: 2px solid var(--red);   /* 핵심 포인트 */
 }
 
 .logo {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 20px;
+  background: var(--red);
+  clip-path: polygon(0 0, 60% 0, 100% 50%, 60% 100%, 0 100%, 40% 50%);
 }
 
 .menu {
   display: flex;
-  gap: 28px;
+  gap: 4px;
   font-size: 13px;
-  color: #d2d2d7;
 }
 
+.menu span {
+  padding: 4px 14px;
+  border-radius: 4px;
+  color: var(--text-sub);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.menu span:hover { color: var(--red); background: #FFF5F5; }
+
+/* ── Hero ── */
 .hero {
   text-align: center;
-  padding: 90px 8% 70px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+  padding: 64px 8% 56px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
 }
 
 .eyebrow {
-  color: #0066cc;
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   margin: 0 0 14px;
+  font-family: var(--font-en);
 }
 
 h1 {
   margin: 0;
-  font-size: 56px;
-  line-height: 1.08;
-  letter-spacing: -1.8px;
+  font-size: 48px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .hero-desc {
   width: 100%;
-  margin: 24px auto 40px;
-  color: #6e6e73;
-  font-size: 19px;
-  line-height: 1.6;
+  margin: 20px auto 36px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.7;
   white-space: nowrap;
 }
 
-.control-card,
-.dashboard,
-.map-size-controls,
-.content-grid,
-.table-section,
-.chart-section {
-  max-width: 1500px;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
+/* ── Control Card ── */
 .control-card {
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e5e5ea;
-  border-radius: 30px;
+  padding: 20px 48px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
   display: grid;
   grid-template-columns:
     minmax(130px, 1fr)
@@ -90,352 +137,305 @@ h1 {
     minmax(130px, 1fr)
     minmax(130px, 1fr)
     auto;
-
   width: min(1400px, calc(100% - 150px)) !important;
-
   margin: 0 auto;
-
   overflow: hidden;
   gap: 10px;
+  column-gap: 22px;
   align-items: end;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
-
-  .control-card {
-  padding-left: 50px !important;
-  padding-right: 50px !important;
-}
-}
-.field {
-  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-input,
-select {
-  min-width: 0;
-}
-
-.field {
-  text-align: left;
-}
+.field { min-width: 0; text-align: left; }
 
 label {
   display: block;
-  margin-bottom: 8px;
-  color: #6e6e73;
-  font-size: 13px;
-  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-input,
-select {
+input, select {
+  min-width: 0;
   width: 100%;
-  height: 46px;
-  border: 1px solid #d2d2d7;
-  border-radius: 999px;
-  padding: 0 16px;
-  background: #fafafc;
-  font-size: 15px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 14px;
+  background: var(--bg-card);
+  font-size: 14px;
+  font-family: var(--font-ko);
+  color: var(--text-main);
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-input:focus,
-select:focus {
-  border-color: #0071e3;
+input:focus, select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,113,206,0.15);
 }
 
 button {
-  height: 46px;
+  height: 44px;
   padding: 0 24px;
   border: none;
-  border-radius: 999px;
-  background: #0066cc;
+  border-radius: 4px;
+  background: var(--red);
   color: white;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-ko);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
+  white-space: nowrap;
 }
+
+button:hover  { background: var(--red-dark); }
+button:active { transform: scale(0.98); }
+
 .map-subtitle {
   display: block;
-  margin-top: 16px !important;
-  font-size: 34px !important;
+  margin-top: 12px !important;
+  font-size: 28px !important;
   font-weight: 700 !important;
-  color: #86868b !important;
+  color: var(--text-muted) !important;
   line-height: 1.3;
 }
-button:hover {
-  background: #0071e3;
-}
 
-button:active {
-  transform: scale(0.96);
-}
-
+/* ── Dashboard ── */
 .dashboard {
-  margin-top: -42px;
-  margin-bottom: 40px;
-  padding: 0 32px;
+  margin-top: 24px;
+  margin-bottom: 24px;
   display: grid;
   grid-template-columns: 1.2fr repeat(4, 1fr);
-  gap: 18px;
+  gap: 12px;
 }
 
-.main-card,
-.mini-card,
-.map-card,
-.chart-card,
-.table-section {
-  background: white;
-  border: 1px solid #e5e5ea;
-  border-radius: 30px;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.045);
+.main-card, .mini-card, .map-card, .chart-card, .table-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
-.main-card,
-.mini-card {
-  min-height: 200px;
-  padding: 28px;
+.main-card, .mini-card {
+  min-height: 160px;
+  padding: 24px 28px;
 }
 
-.main-card:hover,
-.mini-card:hover,
-.map-card:hover,
-.chart-card:hover {
-  transform: translateY(-4px);
-  transition: all 0.25s ease;
+.main-card:hover, .mini-card:hover,
+.map-card:hover, .chart-card:hover {
+  border-color: var(--gray-dark);
+  transition: border-color 0.2s;
 }
 
+/* 주요 위험도 카드 — 네이비 배경 */
 .main-card {
-  background: #1d1d1f;
+  background: var(--navy);
   color: white;
+  border-color: var(--navy);
+  border-top: 3px solid var(--red);
 }
 
-.main-card p,
-.mini-card p {
-  margin: 0 0 14px;
-  color: #86868b;
-  font-size: 14px;
-  font-weight: 600;
+.main-card p, .mini-card p {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-en);
 }
+
+.main-card p { color: rgba(255,255,255,0.55); }
+.mini-card p { color: var(--text-muted); }
 
 .main-card h2 {
   margin: 0;
-  font-size: 58px;
-  letter-spacing: -1.5px;
+  font-size: 52px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-family: var(--font-data);
 }
 
 .main-card span {
   display: inline-block;
-  margin-top: 14px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  margin-top: 12px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.12);
   color: white;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .mini-card h3 {
   margin: 0;
-  font-size: 32px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: var(--font-data);
 }
 
+/* 미니카드 상단 레드 포인트 */
+.mini-card {
+  border-top: 3px solid var(--border);
+  transition: border-top-color 0.2s;
+}
+.mini-card:hover { border-top-color: var(--blue); }
+
+/* ── Map Size Controls ── */
 .map-size-controls {
-  margin-bottom: 22px;
-  padding: 0 32px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.content-grid {
-  margin-bottom: 36px;
-  padding: 0 32px;
+.map-size-controls button {
+  background: var(--bg-card);
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+  font-weight: 500;
+  font-size: 13px;
+  height: 38px;
+  padding: 0 18px;
 }
 
+.map-size-controls button:hover {
+  background: var(--red);
+  color: white;
+  border-color: var(--red);
+}
+
+/* ── Map Cards ── */
 .map-compare-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 26px;
+  gap: 16px;
   align-items: stretch;
 }
 
-.map-compare-grid.selected-large {
-  grid-template-columns: 2.8fr 0.7fr;
-}
-
-.map-compare-grid.live-large {
-  grid-template-columns: 0.7fr 2.8fr;
-}
+.map-compare-grid.selected-large { grid-template-columns: 2.8fr 0.7fr; }
+.map-compare-grid.live-large     { grid-template-columns: 0.7fr 2.8fr; }
 
 .map-panel {
   min-width: 0;
   width: auto;
-  transition: all 0.35s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
-.map-card {
-  padding: 36px;
-}
+.map-card { padding: 28px; }
 
 .section-top h2 {
   margin: 0;
-  font-size: 32px;
-  letter-spacing: -0.8px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
   white-space: nowrap;
 }
 
 .section-top small {
-  color: #86868b;
+  color: var(--text-muted);
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 13px;
 }
 
-.map-compare-grid.selected-large .live-panel .section-top h2,
-.map-compare-grid.live-large .selected-panel .section-top h2 {
-  font-size: 22px;
-  white-space: normal;
+/* 섹션 타이틀 레드 강조선 */
+.section-top {
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 4px;
 }
 
-.map-compare-grid.selected-large .live-panel .eyebrow,
-.map-compare-grid.live-large .selected-panel .eyebrow {
-  font-size: 12px;
-}
-
-.map-compare-grid.selected-large .live-panel small,
-.map-compare-grid.live-large .selected-panel small {
-  font-size: 11px;
-}
+.section-top .eyebrow { margin-bottom: 6px; }
 
 .legend {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 18px 0;
-  color: #6e6e73;
-  font-size: 13px;
+  gap: 10px;
+  margin: 14px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .gradient-bar {
-  width: 140px;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(to right, #22c55e, #facc15, #ef4444);
+  width: 120px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(to right, #27AE60, #F5A623, #ED1B2F);
 }
 
-.map-compare-grid.selected-large .live-panel .gradient-bar,
-.map-compare-grid.live-large .selected-panel .gradient-bar {
-  width: 90px;
-}
-
-#map,
-#liveMap {
+#map, #liveMap {
   width: 100%;
-  height: 720px;
-  border-radius: 24px;
+  height: 680px;
+  border-radius: 4px;
   overflow: hidden;
   background: #dbeafe;
+  border: 1px solid var(--border);
 }
 
+/* ── Table ── */
 .table-section {
-  margin-bottom: 36px;
-  padding: 34px;
+  margin-bottom: 24px;
+  padding: 28px 32px;
 }
 
 table {
   width: 100%;
-  margin-top: 22px;
+  margin-top: 18px;
   border-collapse: collapse;
   font-size: 14px;
 }
 
-th,
-td {
-  padding: 15px 12px;
-  border-bottom: 1px solid #e5e5ea;
+th, td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border);
   text-align: center;
 }
 
 th {
-  color: #6e6e73;
-  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #F9F9F9;
+  font-family: var(--font-en);
 }
 
-tbody tr {
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
+/* 테이블 헤더 상단 레드 라인 */
+thead tr th:first-child { border-radius: 4px 0 0 0; }
+thead tr th:last-child  { border-radius: 0 4px 0 0; }
+thead { border-top: 2px solid var(--red); }
 
-tbody tr:hover {
-  background: #f5f7fb;
-}
+tbody tr { cursor: pointer; transition: background 0.15s; }
+tbody tr:hover { background: #FFF5F5; }
 
-.chart-section {
-  margin-bottom: 80px;
-  padding: 0 32px;
-}
+/* ── Chart ── */
+.chart-section { margin-bottom: 60px; }
 
 .chart-card {
   width: 100%;
-  padding: 34px;
+  padding: 28px 32px;
 }
 
 .chart-card canvas {
-  margin-top: 30px;
-  max-height: 420px;
+  margin-top: 24px;
+  max-height: 400px;
 }
 
-.loading {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-@media (max-width: 1100px) {
-  .dashboard,
-  .control-card {
-    grid-template-columns: 1fr;
-  }
-
-  .map-compare-grid,
-  .map-compare-grid.selected-large,
-  .map-compare-grid.live-large {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-desc {
-    white-space: normal;
-  }
-
-  h1 {
-    font-size: 38px;
-  }
-
-  .menu {
-    display: none;
-  }
-
-  .section-top h2 {
-    white-space: normal;
-  }
-
-  #map,
-  #liveMap {
-    height: 520px;
-  }
-}
-
-:root {
-  --page-width: 1500px;
-  --page-padding: 32px;
-}
-
-.control-card,
-.dashboard,
-.map-size-controls,
-.content-grid,
-.table-section,
-.chart-section {
+/* ── Shared layout ── */
+.control-card, .dashboard, .map-size-controls,
+.content-grid, .table-section, .chart-section {
   width: min(var(--page-width), calc(100% - var(--page-padding) * 2)) !important;
   max-width: none !important;
   margin-left: auto !important;
@@ -444,77 +444,60 @@ tbody tr:hover {
   padding-right: 0 !important;
 }
 
-.table-section,
-.chart-card {
-  padding: 34px !important;
+.table-section, .chart-card {
+  padding: 28px 32px !important;
 }
 
-.content-grid {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
+.content-grid { padding-left: 0 !important; padding-right: 0 !important; }
+.map-size-controls { justify-content: center; }
 
-.map-size-controls {
-  justify-content: center;
-}
-/* 축소 지도 카드 내부 여백 줄이기 */
+/* ── 축소 패널 조정 ── */
 .map-compare-grid.selected-large .live-panel,
-.map-compare-grid.live-large .selected-panel {
-  padding: 22px !important;
-}
+.map-compare-grid.live-large .selected-panel { padding: 20px !important; }
 
-/* 축소 지도 제목/지역명/범례를 같은 비율로 축소 */
 .map-compare-grid.selected-large .live-panel .section-top h2,
 .map-compare-grid.live-large .selected-panel .section-top h2 {
-  font-size: 20px !important;
-  line-height: 1.25 !important;
+  font-size: 18px !important;
   white-space: normal !important;
 }
 
 .map-compare-grid.selected-large .live-panel .map-subtitle,
 .map-compare-grid.live-large .selected-panel .map-subtitle {
-  font-size: 20px !important;
-  line-height: 1.25 !important;
-  margin-top: 12px !important;
+  font-size: 18px !important;
+  margin-top: 10px !important;
   word-break: keep-all;
 }
 
 .map-compare-grid.selected-large .live-panel .eyebrow,
-.map-compare-grid.live-large .selected-panel .eyebrow {
-  font-size: 11px !important;
-}
+.map-compare-grid.live-large .selected-panel .eyebrow { font-size: 10px !important; }
 
 .map-compare-grid.selected-large .live-panel .legend,
-.map-compare-grid.live-large .selected-panel .legend {
-  font-size: 11px !important;
-  gap: 6px !important;
-}
+.map-compare-grid.live-large .selected-panel .legend { font-size: 10px !important; gap: 5px !important; }
 
 .map-compare-grid.selected-large .live-panel .gradient-bar,
-.map-compare-grid.live-large .selected-panel .gradient-bar {
-  width: 76px !important;
-}
+.map-compare-grid.live-large .selected-panel .gradient-bar { width: 70px !important; }
 
-/* 축소 지도 높이도 너무 길지 않게 */
 .map-compare-grid.selected-large .live-panel #liveMap,
-.map-compare-grid.live-large .selected-panel #map {
-  height: 620px !important;
-}
+.map-compare-grid.live-large .selected-panel #map { height: 580px !important; }
 
-/* 확대 지도는 넓고 안정적으로 */
 .map-compare-grid.selected-large .selected-panel #map,
-.map-compare-grid.live-large .live-panel #liveMap {
-  height: 720px !important;
-}
+.map-compare-grid.live-large .live-panel #liveMap { height: 680px !important; }
 
-.control-card {
-  padding-left: 48px !important;
-  padding-right: 48px !important;
-  column-gap: 22px !important;
-}
+/* ── Loading ── */
+.loading { opacity: 0.5; pointer-events: none; }
 
-.control-card .field,
-.control-card button {
-  margin-left: 6px !important;
-  margin-right: 6px !important;
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .dashboard, .control-card { grid-template-columns: 1fr; }
+
+  .map-compare-grid,
+  .map-compare-grid.selected-large,
+  .map-compare-grid.live-large { grid-template-columns: 1fr; }
+
+  .hero-desc { white-space: normal; }
+  h1 { font-size: 32px; }
+  .menu { display: none; }
+  .section-top h2 { white-space: normal; }
+  #map, #liveMap { height: 480px; }
+  .control-card { padding-left: 20px !important; padding-right: 20px !important; }
 }
