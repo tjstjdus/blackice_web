@@ -8,9 +8,9 @@
 :root {
   --red:        #ED1B2F;
   --red-dark:   #C41525;
-  --blue:       #0071CE;
-  --blue-dark:  #005BAA;
-  --navy:       #101E8E;
+  --blue:       #1B2D6B;
+  --blue-dark:   #152258;
+  --navy:        #1B2D6B;
   --burgundy:   #80252A;
   --gray-dark:  #808285;
   --gray-light: #DBD9D6;
@@ -136,31 +136,7 @@ body {
   border-bottom-color: var(--red);
 }
 
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
 
-.nav-search-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: transparent;
-  color: var(--text-sub);
-  border: 1px solid var(--border);
-  height: 34px;
-  padding: 0 14px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 4px;
-}
-
-.nav-search-btn:hover {
-  background: var(--bg-page);
-  color: var(--text-main);
-}
 
 /* ── 서브 네이비 바 ── */
 .subnav {
@@ -275,7 +251,7 @@ input, select {
 
 input:focus, select:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(0,113,206,0.15);
+  box-shadow: 0 0 0 3px rgba(27,45,107,0.15);
 }
 
 button {
