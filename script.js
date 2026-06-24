@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initChart();
 
     await loadRegions();
+    await loadStations();   // 페이지 로드 시 관측소 마커 표시
 
     setDateLimit();
   } catch (error) {
@@ -620,76 +621,124 @@ function updateChart(results) {
 }
 
 // =========================================================
-// 기상 관측소 마커
+// 기상 관측소 — /stations API 호출 후 양쪽 지도에 마커 표시
 // =========================================================
 
-function addStationMarkers(targetMap, results, markerArray, type) {
+// 관측소 원본 데이터 캐시 (한 번만 fetch)
+let stationsCache = null;
+
+async function loadStations() {
+  try {
+    const res = await fetch(`${API_BASE}/stations`);
+    const data = await res.json();
+
+    if (data.status !== "success" || !data.stations.length) {
+      console.warn("관측소 데이터 없음");
+      return;
+    }
+
+    stationsCache = data.stations;
+
+    // 페이지 로드 시 양쪽 지도에 모두 표시
+    renderStationMarkers(map, stationMarkers);
+    renderStationMarkers(liveMap, liveStationMarkers);
+
+  } catch (e) {
+    console.error("관측소 로드 실패:", e);
+  }
+}
+
+function renderStationMarkers(targetMap, markerArray) {
   // 기존 관측소 마커 제거
   markerArray.forEach(m => targetMap.removeLayer(m));
   markerArray.length = 0;
 
-  // asos_id 기준으로 중복 제거 (한 관측소가 여러 지점에 연결될 수 있음)
-  const seen = new Set();
-  const stations = [];
+  if (!stationsCache) return;
 
-  results.forEach(r => {
-    if (!r.asos_id || seen.has(r.asos_id)) return;
-
-    // 관측소의 실제 위도/경도가 없으므로 해당 asos_id에 연결된 첫 번째 지점의 위치 사용
-    seen.add(r.asos_id);
-    stations.push(r);
-  });
-
-  stations.forEach(r => {
-    const lat = Number(r["위도"]);
-    const lon = Number(r["경도"]);
+  stationsCache.forEach(s => {
+    const lat = Number(s.asos_lat);
+    const lon = Number(s.asos_lon);
 
     if (Number.isNaN(lat) || Number.isNaN(lon)) return;
 
-    // 관측소 아이콘 (파란 사각형 마커)
-    const stationIcon = L.divIcon({
+    // 관측소 아이콘 — 남색 사각형
+    const icon = L.divIcon({
       className: "",
       html: `
         <div style="
-          width: 22px; height: 22px;
+          width: 24px; height: 24px;
           background: #1B2D6B;
           border: 2px solid #FFFFFF;
           border-radius: 4px;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+          box-shadow: 0 2px 5px rgba(0,0,0,0.35);
         ">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="white" stroke-width="2.5" stroke-linecap="round">
             <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
           </svg>
         </div>
       `,
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
-      popupAnchor: [0, -14]
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -16]
     });
 
-    const marker = L.marker([lat, lon], { icon: stationIcon })
+    const marker = L.marker([lat, lon], { icon })
       .addTo(targetMap)
       .bindPopup(`
-        <div style="font-family: 'Noto Sans KR', sans-serif; min-width: 160px;">
-          <div style="
-            font-size: 12px; font-weight: 700;
-            color: #1B2D6B; margin-bottom: 6px;
-            text-transform: uppercase; letter-spacing: 0.06em;
-          ">기상 관측소</div>
-          <div style="font-size: 14px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
-            ${r.asos_name || ""} (${r.asos_id || ""})
+        <div style="font-family:'Noto Sans KR',sans-serif; min-width:160px;">
+          <div style="font-size:11px; font-weight:700; color:#1B2D6B;
+            letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">
+            기상 관측소
           </div>
-          <div style="font-size: 13px; color: #333; line-height: 1.8;">
-            🌡️ 기온: <b>${formatValue(r.기온, "℃")}</b><br>
-            💧 습도: <b>${formatValue(r.습도, "%")}</b><br>
-            💨 풍속: <b>${formatValue(r.풍속, "m/s")}</b><br>
-            🌧️ 강수량: <b>${formatValue(r.강수량, "mm")}</b><br>
-            🛣️ 지면온도: <b>${formatValue(r.지면온도, "℃")}</b>
+          <div style="font-size:14px; font-weight:700; color:#1A1A1A; margin-bottom:4px;">
+            ${s.asos_name || ""}
+          </div>
+          <div style="font-size:12px; color:#808285; margin-bottom:10px;">
+            관측소 ID: ${s.asos_id || ""}
+          </div>
+          <div style="font-size:12px; color:#333; line-height:1.9;">
+            위도: ${Number(lat).toFixed(4)}<br>
+            경도: ${Number(lon).toFixed(4)}
           </div>
         </div>
       `);
+
+    markerArray.push(marker);
+  });
+}
+
+// predict 결과가 나온 뒤 호출 — 기존 관측소 마커는 유지하되 갱신
+function addStationMarkers(targetMap, results, markerArray) {
+  // /stations API 기반으로 이미 마커가 그려져 있으면 유지
+  // predict 결과의 기상 데이터를 팝업에 반영하고 싶다면 아래 로직 확장 가능
+  if (stationsCache) return;
+
+  // fallback: /stations API 없을 때 predict 결과에서 asos 위치 추정
+  markerArray.forEach(m => targetMap.removeLayer(m));
+  markerArray.length = 0;
+
+  const seen = new Set();
+  results.forEach(r => {
+    if (!r.asos_id || seen.has(r.asos_id)) return;
+    seen.add(r.asos_id);
+
+    const lat = Number(r["위도"]);
+    const lon = Number(r["경도"]);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="width:20px;height:20px;background:#1B2D6B;border:2px solid #fff;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+      popupAnchor: [0, -14]
+    });
+
+    const marker = L.marker([lat, lon], { icon })
+      .addTo(targetMap)
+      .bindPopup(`<b>${r.asos_name || ""}</b> (${r.asos_id || ""})<br>기온: ${formatValue(r.기온, "℃")}`);
 
     markerArray.push(marker);
   });
