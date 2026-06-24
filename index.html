@@ -15,14 +15,10 @@
 
 <body>
 
-<!-- ── 상단 유틸리티 바 (공사 사이트 스타일) ── -->
+<!-- ── 상단 유틸리티 바 ── -->
 <div class="util-bar">
   <div class="util-inner">
     <span>한국도로공사 블랙아이스 예측 시스템</span>
-    <div class="util-links">
-      <a href="#">English</a>
-      <a href="#">화면크기</a>
-    </div>
   </div>
 </div>
 
@@ -30,43 +26,39 @@
 <header class="nav">
   <div class="nav-inner">
 
-    <!-- ex 로고 SVG (빨강+파랑, 공사 CI 재현) -->
+    <!-- 한국도로공사 ex 로고 (실제 CI 기반 SVG) -->
     <a href="#" class="logo">
-      <svg width="52" height="36" viewBox="0 0 52 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- e (빨강) -->
-        <path d="M2 18C2 10.268 8.268 4 16 4C23.732 4 30 10.268 30 18C30 18 30 19 29.5 20H6.5C7.2 23.5 11 26 16 26C19.5 26 22.5 24.5 24 22.5L28.5 26.5C26 30 21.5 32 16 32C8.268 32 2 25.732 2 18Z" fill="#ED1B2F"/>
-        <path d="M6.5 16H27.5C26.5 11.5 21.8 8 16 8C10.2 8 7 11.5 6.5 16Z" fill="#ED1B2F"/>
-        <!-- x 왼쪽 획 (빨강) -->
-        <path d="M28 6L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
-        <path d="M28 30L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
-        <!-- x 오른쪽 획 (파랑) -->
-        <path d="M36 18L44 6" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
-        <path d="M36 18L44 30" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
-        <!-- 빨강 가로 막대 (e의 중간선) -->
-        <rect x="1" y="15.5" width="16" height="5" rx="2.5" fill="#ED1B2F"/>
+      <svg width="68" height="40" viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- e 글자: 두꺼운 원형 테두리 + 중간 가로선 -->
+        <!-- 바깥 원호 (빨강) -->
+        <path d="M155 100 C155 55 120 20 76 20 C32 20 0 55 0 100 C0 145 32 180 76 180 C108 180 136 163 150 137 L120 120 C112 133 95 142 76 142 C54 142 36 128 29 108 L155 108 Z" fill="#ED1B2F"/>
+        <!-- 중간 가로선 (빨강) -->
+        <rect x="0" y="86" width="155" height="22" rx="0" fill="#ED1B2F"/>
+        <!-- 상단 안쪽 컷 (흰색 — e 안쪽 공간) -->
+        <path d="M76 38 C50 38 30 56 26 80 L126 80 C122 56 102 38 76 38 Z" fill="white"/>
+
+        <!-- x 글자 왼쪽 대각선 두 획 (빨강) -->
+        <!-- 왼쪽 위 → 오른쪽 아래 -->
+        <path d="M175 25 Q195 100 215 175" stroke="#ED1B2F" stroke-width="38" stroke-linecap="round" fill="none"/>
+        <!-- 왼쪽 아래 → 오른쪽 위 -->
+        <path d="M175 175 Q195 100 215 25" stroke="#ED1B2F" stroke-width="38" stroke-linecap="round" fill="none"/>
+
+        <!-- x 글자 오른쪽 대각선 두 획 (파랑) -->
+        <path d="M215 25 Q255 100 295 175" stroke="#0071CE" stroke-width="38" stroke-linecap="round" fill="none"/>
+        <path d="M215 175 Q255 100 295 25" stroke="#0071CE" stroke-width="38" stroke-linecap="round" fill="none"/>
       </svg>
       <span class="logo-text">한국도로공사</span>
     </a>
 
-    <!-- 메인 메뉴 -->
+    <!-- 기능 있는 메뉴만 -->
     <nav class="menu">
       <span class="menu-item active">블랙아이스 예측</span>
-      <span class="menu-item">위험도 분석</span>
-      <span class="menu-item">기상정보</span>
-      <span class="menu-item">지도</span>
-      <span class="menu-item">AI 분석</span>
     </nav>
 
-    <div class="nav-actions">
-      <button class="nav-search-btn" aria-label="검색">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        검색
-      </button>
-    </div>
   </div>
 </header>
 
-<!-- ── 서브 네이비 바 (공사 사이트 서브메뉴) ── -->
+<!-- ── 서브 네이비 바 ── -->
 <div class="subnav">
   <div class="subnav-inner">
     <span class="subnav-home">
@@ -217,14 +209,14 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-logo">
-      <svg width="40" height="28" viewBox="0 0 52 36" fill="none">
-        <path d="M2 18C2 10.268 8.268 4 16 4C23.732 4 30 10.268 30 18C30 18 30 19 29.5 20H6.5C7.2 23.5 11 26 16 26C19.5 26 22.5 24.5 24 22.5L28.5 26.5C26 30 21.5 32 16 32C8.268 32 2 25.732 2 18Z" fill="#ED1B2F"/>
-        <path d="M6.5 16H27.5C26.5 11.5 21.8 8 16 8C10.2 8 7 11.5 6.5 16Z" fill="#ED1B2F"/>
-        <path d="M28 6L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
-        <path d="M28 30L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
-        <path d="M36 18L44 6" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
-        <path d="M36 18L44 30" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
-        <rect x="1" y="15.5" width="16" height="5" rx="2.5" fill="#ED1B2F"/>
+      <svg width="44" height="26" viewBox="0 0 340 200" fill="none">
+        <path d="M155 100 C155 55 120 20 76 20 C32 20 0 55 0 100 C0 145 32 180 76 180 C108 180 136 163 150 137 L120 120 C112 133 95 142 76 142 C54 142 36 128 29 108 L155 108 Z" fill="#ED1B2F"/>
+        <rect x="0" y="86" width="155" height="22" fill="#ED1B2F"/>
+        <path d="M76 38 C50 38 30 56 26 80 L126 80 C122 56 102 38 76 38 Z" fill="white"/>
+        <path d="M175 25 Q195 100 215 175" stroke="#ED1B2F" stroke-width="38" stroke-linecap="round" fill="none"/>
+        <path d="M175 175 Q195 100 215 25" stroke="#ED1B2F" stroke-width="38" stroke-linecap="round" fill="none"/>
+        <path d="M215 25 Q255 100 295 175" stroke="#0071CE" stroke-width="38" stroke-linecap="round" fill="none"/>
+        <path d="M215 175 Q255 100 295 25" stroke="#0071CE" stroke-width="38" stroke-linecap="round" fill="none"/>
       </svg>
       <span>한국도로공사</span>
     </div>
