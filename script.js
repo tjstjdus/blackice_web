@@ -6,6 +6,10 @@ let liveMap;
 let markers = [];
 let liveMarkers = [];
 
+// 기상 관측소 마커
+let stationMarkers = [];
+let liveStationMarkers = [];
+
 let riskChart;
 let regions = {};
 
@@ -500,6 +504,9 @@ function updateMap(results) {
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.2));
   }
+
+  // 기상 관측소 마커 표시
+  addStationMarkers(map, results, stationMarkers, "station");
 }
 
 function updateLiveMap(results) {
@@ -550,6 +557,9 @@ function updateLiveMap(results) {
     const group = L.featureGroup(liveMarkers);
     liveMap.fitBounds(group.getBounds().pad(0.2));
   }
+
+  // 기상 관측소 마커 표시
+  addStationMarkers(liveMap, results, liveStationMarkers, "liveStation");
 }
 
 function zoomToLocation(lat, lon) {
@@ -607,6 +617,82 @@ function updateChart(results) {
       );
     }
   };
+}
+
+// =========================================================
+// 기상 관측소 마커
+// =========================================================
+
+function addStationMarkers(targetMap, results, markerArray, type) {
+  // 기존 관측소 마커 제거
+  markerArray.forEach(m => targetMap.removeLayer(m));
+  markerArray.length = 0;
+
+  // asos_id 기준으로 중복 제거 (한 관측소가 여러 지점에 연결될 수 있음)
+  const seen = new Set();
+  const stations = [];
+
+  results.forEach(r => {
+    if (!r.asos_id || seen.has(r.asos_id)) return;
+
+    // 관측소의 실제 위도/경도가 없으므로 해당 asos_id에 연결된 첫 번째 지점의 위치 사용
+    seen.add(r.asos_id);
+    stations.push(r);
+  });
+
+  stations.forEach(r => {
+    const lat = Number(r["위도"]);
+    const lon = Number(r["경도"]);
+
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+
+    // 관측소 아이콘 (파란 사각형 마커)
+    const stationIcon = L.divIcon({
+      className: "",
+      html: `
+        <div style="
+          width: 22px; height: 22px;
+          background: #1B2D6B;
+          border: 2px solid #FFFFFF;
+          border-radius: 4px;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        ">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+            stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+      popupAnchor: [0, -14]
+    });
+
+    const marker = L.marker([lat, lon], { icon: stationIcon })
+      .addTo(targetMap)
+      .bindPopup(`
+        <div style="font-family: 'Noto Sans KR', sans-serif; min-width: 160px;">
+          <div style="
+            font-size: 12px; font-weight: 700;
+            color: #1B2D6B; margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.06em;
+          ">기상 관측소</div>
+          <div style="font-size: 14px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
+            ${r.asos_name || ""} (${r.asos_id || ""})
+          </div>
+          <div style="font-size: 13px; color: #333; line-height: 1.8;">
+            🌡️ 기온: <b>${formatValue(r.기온, "℃")}</b><br>
+            💧 습도: <b>${formatValue(r.습도, "%")}</b><br>
+            💨 풍속: <b>${formatValue(r.풍속, "m/s")}</b><br>
+            🌧️ 강수량: <b>${formatValue(r.강수량, "mm")}</b><br>
+            🛣️ 지면온도: <b>${formatValue(r.지면온도, "℃")}</b>
+          </div>
+        </div>
+      `);
+
+    markerArray.push(marker);
+  });
 }
 
 function updateTable(results) {
