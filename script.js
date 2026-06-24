@@ -332,28 +332,76 @@ async function predictRisk() {
     updateAverageCards(results);
 
     if (realtimeMode) {
+      // 실시간 모드: 양쪽 모두 현재 시각 결과
       updateLiveMap(results);
       setMainMap("live");
+
+      document.getElementById("selectedMapSub").innerText =
+        `${province} ${city} · 실시간 기준`;
+      document.getElementById("liveMapSub").innerText =
+        `${province} ${city} · 실시간 기준`;
+
     } else {
+      // 날짜 선택 모드: 왼쪽은 선택 날짜, 오른쪽은 현재 시각으로 별도 호출
       updateMap(results);
-      updateLiveMap(results);
       setMainMap("selected");
+
+      document.getElementById("selectedMapSub").innerText =
+        `${province} ${city} · ${date} ${time}`;
+
+      // 오른쪽 지도 — 현재 시각으로 별도 API 호출
+      fetchLiveMap(province, city);
     }
 
     updateChart(results);
     updateTable(results);
 
-    document.getElementById("selectedMapSub").innerText =
-      realtimeMode
-        ? `${province} ${city} · 실시간 기준`
-        : `${province} ${city} · ${date} ${time}`;
-
-    document.getElementById("liveMapSub").innerText =
-      `${province} ${city} · 실시간 기준`;
-
   } catch (error) {
     console.error(error);
     alert("예측 실패");
+  }
+}
+
+// 오른쪽 지도 전용 — 항상 현재 시각으로 호출
+async function fetchLiveMap(province, city) {
+  const now = getCurrentDateTime();
+
+  document.getElementById("liveMapSub").innerText =
+    `${province} ${city} · 실시간 ${now.date} ${now.time} 기준`;
+
+  try {
+    const response = await fetch(`${API_BASE}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: now.date,
+        time: now.time,
+        province,
+        city,
+        max_points: 20
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.status !== "success" || !data.results?.length) {
+      console.warn("실시간 지도 결과 없음:", data.message);
+      document.getElementById("liveMapSub").innerText =
+        `${province} ${city} · 실시간 데이터 없음`;
+      return;
+    }
+
+    const results = data.results.sort((a, b) =>
+      Number(b.blackice_probability_percent || 0) -
+      Number(a.blackice_probability_percent || 0)
+    );
+
+    updateLiveMap(results);
+
+  } catch (error) {
+    console.error("실시간 지도 호출 실패:", error);
+    document.getElementById("liveMapSub").innerText =
+      `${province} ${city} · 실시간 로드 실패`;
   }
 }
 
