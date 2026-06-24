@@ -36,56 +36,154 @@ body {
   color: var(--text-sub);
 }
 
-/* ── Navigation ── */
-.nav {
-  height: 60px;
-  padding: 0 8%;
-  background: var(--bg-card);
-  color: var(--text-main);
+/* ── 유틸리티 바 ── */
+.util-bar {
+  background: #F5F5F5;
+  border-bottom: 1px solid var(--border);
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.util-inner {
+  width: min(var(--page-width), calc(100% - 80px));
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.util-links {
+  display: flex;
+  gap: 16px;
+}
+
+.util-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  transition: color 0.2s;
+}
+
+.util-links a:hover { color: var(--red); }
+
+/* ── 메인 네비게이션 ── */
+.nav {
+  height: 64px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 999;
-  border-bottom: 2px solid var(--red);   /* 핵심 포인트 */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
+.nav-inner {
+  width: min(var(--page-width), calc(100% - 80px));
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* ex 로고 */
 .logo {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-main);
-  letter-spacing: -0.01em;
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-.logo::before {
-  content: '';
-  display: inline-block;
-  width: 28px;
-  height: 20px;
-  background: var(--red);
-  clip-path: polygon(0 0, 60% 0, 100% 50%, 60% 100%, 0 100%, 40% 50%);
+.logo-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
+/* 메뉴 */
 .menu {
   display: flex;
-  gap: 4px;
-  font-size: 13px;
+  gap: 0;
+  flex: 1;
+  justify-content: center;
 }
 
-.menu span {
-  padding: 4px 14px;
-  border-radius: 4px;
-  color: var(--text-sub);
+.menu-item {
+  padding: 0 20px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
   font-weight: 500;
+  color: var(--text-sub);
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
 }
 
-.menu span:hover { color: var(--red); background: #FFF5F5; }
+.menu-item:hover { color: var(--red); }
+.menu-item.active {
+  color: var(--red);
+  font-weight: 700;
+  border-bottom-color: var(--red);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.nav-search-btn:hover {
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+/* ── 서브 네이비 바 ── */
+.subnav {
+  background: var(--navy);
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.subnav-inner {
+  width: min(var(--page-width), calc(100% - 80px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+
+.subnav-home svg { vertical-align: middle; }
+.subnav-sep { font-size: 9px; color: rgba(255,255,255,0.4); }
+.subnav-item { color: rgba(255,255,255,0.7); }
+.subnav-item.active { color: #FFFFFF; font-weight: 700; }
 
 /* ── Hero ── */
 .hero {
@@ -500,4 +598,47 @@ tbody tr:hover { background: #FFF5F5; }
   .section-top h2 { white-space: normal; }
   #map, #liveMap { height: 480px; }
   .control-card { padding-left: 20px !important; padding-right: 20px !important; }
+}
+
+/* ── Footer ── */
+.site-footer {
+  background: var(--navy);
+  padding: 28px 0;
+  margin-top: 40px;
+}
+
+.footer-inner {
+  width: min(var(--page-width), calc(100% - 80px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  padding-right: 24px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+.footer-info {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+}
+
+/* ── 반응형 추가 ── */
+@media (max-width: 1100px) {
+  .util-bar { display: none; }
+  .subnav { display: none; }
+  .nav-inner { padding: 0 20px; }
+  .menu { display: none; }
+  .footer-inner { flex-direction: column; align-items: flex-start; padding: 0 20px; }
+  .footer-logo { border-right: none; padding-right: 0; }
 }
