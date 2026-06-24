@@ -7,8 +7,6 @@
 
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-  <!-- 한국도로공사 폰트 시스템 -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -17,31 +15,82 @@
 
 <body>
 
+<!-- ── 상단 유틸리티 바 (공사 사이트 스타일) ── -->
+<div class="util-bar">
+  <div class="util-inner">
+    <span>한국도로공사 블랙아이스 예측 시스템</span>
+    <div class="util-links">
+      <a href="#">English</a>
+      <a href="#">화면크기</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── 메인 네비게이션 ── -->
 <header class="nav">
-  <div class="logo">블랙아이스 위험도 예측 시스템</div>
-  <div class="menu">
-    <span>위험도</span>
-    <span>기상정보</span>
-    <span>지도</span>
-    <span>AI 분석</span>
+  <div class="nav-inner">
+
+    <!-- ex 로고 SVG (빨강+파랑, 공사 CI 재현) -->
+    <a href="#" class="logo">
+      <svg width="52" height="36" viewBox="0 0 52 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- e (빨강) -->
+        <path d="M2 18C2 10.268 8.268 4 16 4C23.732 4 30 10.268 30 18C30 18 30 19 29.5 20H6.5C7.2 23.5 11 26 16 26C19.5 26 22.5 24.5 24 22.5L28.5 26.5C26 30 21.5 32 16 32C8.268 32 2 25.732 2 18Z" fill="#ED1B2F"/>
+        <path d="M6.5 16H27.5C26.5 11.5 21.8 8 16 8C10.2 8 7 11.5 6.5 16Z" fill="#ED1B2F"/>
+        <!-- x 왼쪽 획 (빨강) -->
+        <path d="M28 6L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
+        <path d="M28 30L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
+        <!-- x 오른쪽 획 (파랑) -->
+        <path d="M36 18L44 6" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
+        <path d="M36 18L44 30" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
+        <!-- 빨강 가로 막대 (e의 중간선) -->
+        <rect x="1" y="15.5" width="16" height="5" rx="2.5" fill="#ED1B2F"/>
+      </svg>
+      <span class="logo-text">한국도로공사</span>
+    </a>
+
+    <!-- 메인 메뉴 -->
+    <nav class="menu">
+      <span class="menu-item active">블랙아이스 예측</span>
+      <span class="menu-item">위험도 분석</span>
+      <span class="menu-item">기상정보</span>
+      <span class="menu-item">지도</span>
+      <span class="menu-item">AI 분석</span>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="nav-search-btn" aria-label="검색">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        검색
+      </button>
+    </div>
   </div>
 </header>
 
+<!-- ── 서브 네이비 바 (공사 사이트 서브메뉴) ── -->
+<div class="subnav">
+  <div class="subnav-inner">
+    <span class="subnav-home">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </span>
+    <span class="subnav-sep">▶</span>
+    <span class="subnav-item">블랙아이스 예측 시스템</span>
+    <span class="subnav-sep">▶</span>
+    <span class="subnav-item active">위험도 예측</span>
+  </div>
+</div>
+
+<!-- ── Hero ── -->
 <section class="hero">
-
   <p class="eyebrow">Real-time AI prediction · Korea Expressway Corporation</p>
-
   <h1>
     도로 위 보이지 않는 위험을<br>
     실시간으로 예측합니다.
   </h1>
-
   <p class="hero-desc">
     기상청 API와 지형 데이터를 기반으로 블랙아이스 위험도를 분석하고 위험 지역을 시각화합니다.
   </p>
 
   <div class="control-card">
-
     <div class="field">
       <label>예측 모드</label>
       <select id="modeSelect" onchange="changeMode()">
@@ -49,72 +98,60 @@
         <option value="realtime">실시간</option>
       </select>
     </div>
-
     <div class="field">
       <label>날짜</label>
       <input type="date" id="date">
     </div>
-
     <div class="field">
       <label>시간</label>
       <input type="time" id="time">
     </div>
-
     <div class="field">
       <label>도</label>
       <select id="province"></select>
     </div>
-
     <div class="field">
       <label>시</label>
       <select id="city"></select>
     </div>
-
-    <button onclick="predictRisk()">
-      위험도 예측
-    </button>
-
+    <button onclick="predictRisk()">위험도 예측</button>
   </div>
 </section>
 
+<!-- ── Dashboard ── -->
 <section class="dashboard">
-
   <div class="main-card" id="mainRiskCard">
     <p>Black Ice Risk</p>
     <h2 id="mainRisk">-</h2>
     <span id="riskLevel">예측 전</span>
   </div>
-
   <div class="mini-card">
     <p>결빙 확률</p>
     <h3 id="icingProb">-</h3>
   </div>
-
   <div class="mini-card">
     <p>기온</p>
     <h3 id="temp">-</h3>
   </div>
-
   <div class="mini-card">
     <p>습도</p>
     <h3 id="humidity">-</h3>
   </div>
-
   <div class="mini-card">
     <p>풍속</p>
     <h3 id="wind">-</h3>
   </div>
-
 </section>
 
+<!-- ── Map Controls ── -->
 <div class="map-size-controls">
   <button onclick="setMainMap('selected')">기준시각 확대</button>
   <button onclick="setMainMap('live')">실시간 확대</button>
   <button onclick="resetMapLayout()">반반 보기</button>
 </div>
 
+<!-- ── Maps ── -->
 <section class="content-grid map-compare-grid" id="mapCompareGrid">
-
   <div class="map-card map-panel selected-panel" onclick="setMainMap('selected')">
     <div class="section-top">
       <p class="eyebrow">Black ice risk map</p>
@@ -142,9 +179,9 @@
     </div>
     <div id="liveMap"></div>
   </div>
-
 </section>
 
+<!-- ── Table ── -->
 <section class="table-section">
   <div class="section-top">
     <p class="eyebrow">Result</p>
@@ -165,6 +202,7 @@
   </table>
 </section>
 
+<!-- ── Chart ── -->
 <section class="chart-section">
   <div class="chart-card">
     <div class="section-top">
@@ -175,7 +213,28 @@
   </div>
 </section>
 
-<script src="script.js"></script>
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg width="40" height="28" viewBox="0 0 52 36" fill="none">
+        <path d="M2 18C2 10.268 8.268 4 16 4C23.732 4 30 10.268 30 18C30 18 30 19 29.5 20H6.5C7.2 23.5 11 26 16 26C19.5 26 22.5 24.5 24 22.5L28.5 26.5C26 30 21.5 32 16 32C8.268 32 2 25.732 2 18Z" fill="#ED1B2F"/>
+        <path d="M6.5 16H27.5C26.5 11.5 21.8 8 16 8C10.2 8 7 11.5 6.5 16Z" fill="#ED1B2F"/>
+        <path d="M28 6L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
+        <path d="M28 30L36 18" stroke="#ED1B2F" stroke-width="6" stroke-linecap="round"/>
+        <path d="M36 18L44 6" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
+        <path d="M36 18L44 30" stroke="#0071CE" stroke-width="6" stroke-linecap="round"/>
+        <rect x="1" y="15.5" width="16" height="5" rx="2.5" fill="#ED1B2F"/>
+      </svg>
+      <span>한국도로공사</span>
+    </div>
+    <div class="footer-info">
+      <p>블랙아이스 위험도 예측 시스템 · Korea Expressway Corporation</p>
+      <p style="margin-top:4px; color:#808285; font-size:12px;">기상청 API 데이터 기반 · 예측 결과는 참고용이며 실제 도로 상황과 다를 수 있습니다.</p>
+    </div>
+  </div>
+</footer>
 
+<script src="script.js"></script>
 </body>
 </html>
