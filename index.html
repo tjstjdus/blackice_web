@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Black Ice Forecast</title>
+  <title>블랙아이스 위험도 예측 — 한국도로공사</title>
 
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <!-- 한국도로공사 폰트 시스템 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,19 +18,18 @@
 <body>
 
 <header class="nav">
-  <div class="logo">Black Ice Forecast</div>
-
+  <div class="logo">블랙아이스 위험도 예측 시스템</div>
   <div class="menu">
-    <span>Risk</span>
-    <span>Weather</span>
-    <span>Map</span>
-    <span>AI</span>
+    <span>위험도</span>
+    <span>기상정보</span>
+    <span>지도</span>
+    <span>AI 분석</span>
   </div>
 </header>
 
 <section class="hero">
 
-  <p class="eyebrow">Real-time AI prediction</p>
+  <p class="eyebrow">Real-time AI prediction · Korea Expressway Corporation</p>
 
   <h1>
     도로 위 보이지 않는 위험을<br>
@@ -119,54 +116,40 @@
 <section class="content-grid map-compare-grid" id="mapCompareGrid">
 
   <div class="map-card map-panel selected-panel" onclick="setMainMap('selected')">
-
     <div class="section-top">
       <p class="eyebrow">Black ice risk map</p>
       <h2>블랙아이스 사고 위험 지도</h2>
-      <small id="selectedMapSub" class="map-subtitle">
-        사용자가 선택한 지역, 날짜, 시간
-      </small>
+      <small id="selectedMapSub" class="map-subtitle">사용자가 선택한 지역, 날짜, 시간</small>
     </div>
-
     <div class="legend gradient-legend">
       <span>낮음</span>
       <div class="gradient-bar"></div>
       <span>높음</span>
     </div>
-
     <div id="map"></div>
-
   </div>
 
   <div class="map-card map-panel live-panel" onclick="setMainMap('live')">
-
     <div class="section-top">
       <p class="eyebrow">Real-time black ice risk map</p>
       <h2>실시간 블랙아이스 사고 위험 지도</h2>
-      <small id="liveMapSub" class="map-subtitle">
-        사용자가 선택한 지역
-      </small>
+      <small id="liveMapSub" class="map-subtitle">사용자가 선택한 지역</small>
     </div>
-
     <div class="legend gradient-legend">
       <span>낮음</span>
       <div class="gradient-bar"></div>
       <span>높음</span>
     </div>
-
     <div id="liveMap"></div>
-
   </div>
 
 </section>
 
 <section class="table-section">
-
   <div class="section-top">
     <p class="eyebrow">Result</p>
     <h2>위험 지점 리스트</h2>
   </div>
-
   <table>
     <thead>
       <tr>
@@ -176,29 +159,20 @@
         <th>결빙확률</th>
       </tr>
     </thead>
-
     <tbody id="resultTable">
-      <tr>
-        <td colspan="4">예측 결과가 표시됩니다.</td>
-      </tr>
+      <tr><td colspan="4">예측 결과가 표시됩니다.</td></tr>
     </tbody>
   </table>
-
 </section>
 
 <section class="chart-section">
-
   <div class="chart-card">
-
     <div class="section-top">
       <p class="eyebrow">Top Risk</p>
       <h2>위험도 상위 지점</h2>
     </div>
-
     <canvas id="riskChart"></canvas>
-
   </div>
-
 </section>
 
 <script src="script.js"></script>
