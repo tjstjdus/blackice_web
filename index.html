@@ -98,8 +98,8 @@
   <div class="nationwide-header">
     <div>
       <p class="eyebrow">Nationwide Forecast</p>
-      <h2>전국 고속도로 위험도 예측</h2>
-      <small>위험도 상위 지점이 자동으로 확대되며 표시됩니다</small>
+      <h2>전국 지점 위험도 예측</h2>
+      <small>지도를 직접 확대·이동하면 화면 안의 위험도 상위 지점이 표시됩니다</small>
     </div>
 
     <div class="nf-tabs">
@@ -111,10 +111,11 @@
 
   <div class="nf-body">
     <div class="nf-map-card">
-      <div class="nf-zoom-badge" id="nfZoomBadge">전국 고속도로 위험도 분석 중</div>
-      <button class="nf-replay-btn" id="nfReplayBtn" onclick="startAutoFlyTo()" title="자동 재생">
+      <div class="nf-zoom-badge" id="nfZoomBadge">전국 지점 위험도 분석 중</div>
+      <button class="nf-replay-btn" id="nfResetBtn" onclick="resetNationwideView()" title="전국 보기로 돌아가기">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3"/>
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
         </svg>
       </button>
       <div id="nationwideMap"></div>
@@ -122,6 +123,7 @@
 
     <div class="nf-panel">
       <div class="nf-panel-label">위험도 상위 지점</div>
+      <div class="nf-visible-count" id="nfVisibleCount"></div>
       <div id="nfRankList">
         <div class="nf-loading">데이터 로딩 중...</div>
       </div>
