@@ -885,3 +885,10 @@ tbody tr:hover { background: #FFF5F5; }
   #nationwideMap { height: 360px; }
   .nf-detail-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+.nf-visible-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -6px;
+  margin-bottom: 10px;
+}
