@@ -92,6 +92,76 @@
   </div>
 </section>
 
+<!-- ── 전국 고속도로 미래 예측 섹션 ── -->
+<section class="nationwide-section">
+
+  <div class="nationwide-header">
+    <div>
+      <p class="eyebrow">Nationwide Forecast</p>
+      <h2>전국 고속도로 위험도 예측</h2>
+      <small>위험도 상위 지점이 자동으로 확대되며 표시됩니다</small>
+    </div>
+
+    <div class="nf-tabs">
+      <button class="nf-tab active" data-offset="0" onclick="switchNationwideTab(0, this)">현재</button>
+      <button class="nf-tab" data-offset="30" onclick="switchNationwideTab(30, this)">30분 후</button>
+      <button class="nf-tab" data-offset="60" onclick="switchNationwideTab(60, this)">1시간 후</button>
+    </div>
+  </div>
+
+  <div class="nf-body">
+    <div class="nf-map-card">
+      <div class="nf-zoom-badge" id="nfZoomBadge">전국 고속도로 위험도 분석 중</div>
+      <button class="nf-replay-btn" id="nfReplayBtn" onclick="startAutoFlyTo()" title="자동 재생">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+      <div id="nationwideMap"></div>
+    </div>
+
+    <div class="nf-panel">
+      <div class="nf-panel-label">위험도 상위 지점</div>
+      <div id="nfRankList">
+        <div class="nf-loading">데이터 로딩 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nf-detail-panel" id="nfDetailPanel" style="display:none;">
+    <div class="nf-detail-close" onclick="closeNfDetail()">×</div>
+    <div class="nf-detail-eyebrow">선택 지점 상세 정보</div>
+    <div class="nf-detail-name" id="nfDetailName">-</div>
+    <div class="nf-detail-grid">
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">위험도</span>
+        <span class="nf-detail-val" id="nfDetailRisk">-</span>
+      </div>
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">결빙확률</span>
+        <span class="nf-detail-val" id="nfDetailIcing">-</span>
+      </div>
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">기온</span>
+        <span class="nf-detail-val" id="nfDetailTemp">-</span>
+      </div>
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">습도</span>
+        <span class="nf-detail-val" id="nfDetailHumidity">-</span>
+      </div>
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">풍속</span>
+        <span class="nf-detail-val" id="nfDetailWind">-</span>
+      </div>
+      <div class="nf-detail-item">
+        <span class="nf-detail-key">관측소</span>
+        <span class="nf-detail-val" id="nfDetailStation">-</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
 <!-- ── Dashboard ── -->
 <section class="dashboard">
   <div class="main-card" id="mainRiskCard">
