@@ -19,10 +19,10 @@ let liveTimer = null;
 // ── 전국 고속도로 예측 관련 전역 변수 ──
 let nationwideMap;
 let nationwideMarkers = [];
-let nationwideTopRisk = [];
+let nationwideMarkerMap = {};      // pointKey → Leaflet marker
+let nationwideAllResults = [];     // 서버에서 받아온 전체 지점
+let nationwideVisibleTop = [];     // 현재 화면에 보이는 위험도 상위 지점
 let nationwideCurrentOffset = 0;
-let autoFlyTimer = null;
-let autoFlyIndex = 0;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -849,6 +849,11 @@ function initNationwideMap() {
     attribution: "",
     maxZoom: 18
   }).addTo(nationwideMap);
+
+  // 지도를 움직이거나 줌할 때마다 현재 화면 기준으로 사이드바 갱신
+  nationwideMap.on("moveend zoomend", () => {
+    updateVisibleRankList();
+  });
 }
 
 // =========================================================
@@ -859,7 +864,6 @@ function switchNationwideTab(offsetMinutes, btnEl) {
   document.querySelectorAll(".nf-tab").forEach(b => b.classList.remove("active"));
   btnEl.classList.add("active");
 
-  stopAutoFlyTo();
   closeNfDetail();
   loadNationwideForecast(offsetMinutes);
 }
@@ -874,12 +878,14 @@ async function loadNationwideForecast(offsetMinutes) {
   const badge = document.getElementById("nfZoomBadge");
   const rankList = document.getElementById("nfRankList");
 
-  badge.innerText = "전국 고속도로 위험도 분석 중...";
+  badge.innerText = "전국 지점 위험도 분석 중...";
   rankList.innerHTML = `<div class="nf-loading">데이터 로딩 중...</div>`;
 
   try {
+    // top_n을 크게 잡아서 사실상 전체 지점을 다 받아온 뒤
+    // 화면에 보이는 지점만 골라 사이드바에 표시
     const res = await fetch(
-      `${API_BASE}/predict/nationwide?offset_minutes=${offsetMinutes}&top_n=10`
+      `${API_BASE}/predict/nationwide?offset_minutes=${offsetMinutes}&top_n=9999`
     );
     const data = await res.json();
 
@@ -889,18 +895,19 @@ async function loadNationwideForecast(offsetMinutes) {
       return;
     }
 
-    nationwideTopRisk = data.top_risk || [];
+    nationwideAllResults = data.results;
 
-    renderNationwideMarkers(data.results);
-    renderRankList(nationwideTopRisk);
+    renderNationwideMarkers(nationwideAllResults);
 
     const label = offsetMinutes === 0 ? "현재" :
                   offsetMinutes === 30 ? "30분 후" : "1시간 후";
     badge.innerText = `${label} 기준 · ${data.target_time || ""}`;
 
-    // 전국 뷰로 리셋 후 자동 재생 시작
+    // 전국 뷰로 리셋 — 자동 줌인 없음, 사용자가 직접 탐색
     nationwideMap.setView([36.2, 127.8], 7, { animate: true });
-    startAutoFlyTo();
+
+    // 현재 화면 기준으로 사이드바 채우기
+    updateVisibleRankList();
 
   } catch (e) {
     console.error("전국 예측 로드 실패:", e);
@@ -920,9 +927,14 @@ function getRiskColor(pct) {
   return "#27AE60";
 }
 
+function pointKey(r) {
+  return `${r.asos_id}_${r["위도"]}_${r["경도"]}`;
+}
+
 function renderNationwideMarkers(results) {
   nationwideMarkers.forEach(m => nationwideMap.removeLayer(m));
   nationwideMarkers = [];
+  nationwideMarkerMap = {};
 
   results.forEach(r => {
     const lat = Number(r["위도"]);
@@ -931,21 +943,21 @@ function renderNationwideMarkers(results) {
 
     const pct = Number(r.blackice_probability_percent || 0);
     const color = getRiskColor(pct);
-    const isTop = nationwideTopRisk.some(t => t.asos_id === r.asos_id && t["위도"] === r["위도"]);
+    const isHigh = pct >= 50;
 
     const icon = L.divIcon({
       className: "",
       html: `
-        <div class="${isTop ? "nf-pulse-marker" : ""}" style="
-          width: ${isTop ? 14 : 9}px; height: ${isTop ? 14 : 9}px;
+        <div style="
+          width: ${isHigh ? 13 : 9}px; height: ${isHigh ? 13 : 9}px;
           background: ${color};
           border: 1.5px solid #fff;
           border-radius: 50%;
           box-shadow: 0 1px 3px rgba(0,0,0,0.35);
         "></div>
       `,
-      iconSize: [isTop ? 14 : 9, isTop ? 14 : 9],
-      iconAnchor: [isTop ? 7 : 4.5, isTop ? 7 : 4.5],
+      iconSize: [isHigh ? 13 : 9, isHigh ? 13 : 9],
+      iconAnchor: [isHigh ? 6.5 : 4.5, isHigh ? 6.5 : 4.5],
       popupAnchor: [0, -10]
     });
 
@@ -965,18 +977,52 @@ function renderNationwideMarkers(results) {
     `);
 
     nationwideMarkers.push(marker);
+    nationwideMarkerMap[pointKey(r)] = marker;
   });
+}
+
+// =========================================================
+// 현재 화면(viewport)에 보이는 지점 중 위험도 상위 → 사이드바
+// =========================================================
+
+function updateVisibleRankList() {
+  if (!nationwideAllResults.length) return;
+
+  const bounds = nationwideMap.getBounds();
+
+  const visible = nationwideAllResults.filter(r => {
+    const lat = Number(r["위도"]);
+    const lon = Number(r["경도"]);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
+    return bounds.contains([lat, lon]);
+  });
+
+  const sorted = visible.sort(
+    (a, b) =>
+      Number(b.blackice_probability_percent || 0) -
+      Number(a.blackice_probability_percent || 0)
+  );
+
+  nationwideVisibleTop = sorted.slice(0, 15);
+  renderRankList(nationwideVisibleTop, visible.length);
 }
 
 // =========================================================
 // 우측 랭킹 패널 렌더링
 // =========================================================
 
-function renderRankList(topRisk) {
+function renderRankList(topRisk, totalVisibleCount) {
   const rankList = document.getElementById("nfRankList");
+  const countLabel = document.getElementById("nfVisibleCount");
+
+  if (countLabel) {
+    countLabel.innerText = totalVisibleCount != null
+      ? `현재 화면 내 ${totalVisibleCount}개 지점`
+      : "";
+  }
 
   if (!topRisk.length) {
-    rankList.innerHTML = `<div class="nf-loading">위험 지점이 없습니다.</div>`;
+    rankList.innerHTML = `<div class="nf-loading">현재 화면에 표시된 지점이 없습니다.<br>지도를 이동하거나 축소해보세요.</div>`;
     return;
   }
 
@@ -986,7 +1032,7 @@ function renderRankList(topRisk) {
     const name = `${r["시군구"] || ""} ${r["읍면동"] || ""}`.trim() || r["시도"] || "지점";
 
     return `
-      <div class="nf-rank-item" data-idx="${i}" onclick="flyToRankItem(${i})">
+      <div class="nf-rank-item" data-key="${pointKey(r)}" onclick="flyToRankItem('${pointKey(r)}')">
         <div class="nf-rank-num" style="background:${color};">${i + 1}</div>
         <div class="nf-rank-name">${name}</div>
         <div class="nf-rank-val" style="color:${color};">${pct.toFixed(0)}%</div>
@@ -1004,74 +1050,33 @@ function flyToPoint(r) {
   const lon = Number(r["경도"]);
   if (Number.isNaN(lat) || Number.isNaN(lon)) return;
 
-  stopAutoFlyTo();
-
-  nationwideMap.flyTo([lat, lon], 13, { duration: 2.2 });
+  nationwideMap.flyTo([lat, lon], 13, { duration: 1.6 });
 
   const name = `${r["시군구"] || ""} ${r["읍면동"] || ""}`.trim() || r["시도"] || "선택 지점";
   document.getElementById("nfZoomBadge").innerText = `${name} 확대 중`;
 
   showNfDetail(r);
   highlightRankItem(r);
+
+  // 해당 마커 팝업도 함께 오픈
+  const marker = nationwideMarkerMap[pointKey(r)];
+  if (marker) {
+    setTimeout(() => marker.openPopup(), 1700);
+  }
 }
 
-function flyToRankItem(idx) {
-  const r = nationwideTopRisk[idx];
+function flyToRankItem(key) {
+  const r = nationwideVisibleTop.find(item => pointKey(item) === key)
+         || nationwideAllResults.find(item => pointKey(item) === key);
   if (!r) return;
   flyToPoint(r);
 }
 
 function highlightRankItem(r) {
   document.querySelectorAll(".nf-rank-item").forEach(el => el.classList.remove("active"));
-  const idx = nationwideTopRisk.findIndex(
-    t => t.asos_id === r.asos_id && t["위도"] === r["위도"]
-  );
-  if (idx >= 0) {
-    const el = document.querySelector(`.nf-rank-item[data-idx="${idx}"]`);
-    if (el) el.classList.add("active");
-  }
+  const el = document.querySelector(`.nf-rank-item[data-key="${pointKey(r)}"]`);
+  if (el) el.classList.add("active");
 }
-
-// =========================================================
-// 자동 재생 — 위험도 상위 지점 순환 flyTo
-// =========================================================
-
-function startAutoFlyTo() {
-  stopAutoFlyTo();
-
-  if (!nationwideTopRisk.length) return;
-
-  autoFlyIndex = 0;
-
-  const runNext = () => {
-    if (autoFlyIndex >= nationwideTopRisk.length) {
-      autoFlyIndex = 0;
-    }
-    flyToPoint(nationwideTopRisk[autoFlyIndex]);
-    autoFlyIndex++;
-  };
-
-  runNext();
-  autoFlyTimer = setInterval(runNext, 4000);
-}
-
-function stopAutoFlyTo() {
-  if (autoFlyTimer) {
-    clearInterval(autoFlyTimer);
-    autoFlyTimer = null;
-  }
-}
-
-// 사용자가 지도를 직접 조작하면 자동 재생 중단
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    if (nationwideMap) {
-      nationwideMap.on("dragstart zoomstart", () => {
-        if (autoFlyTimer) stopAutoFlyTo();
-      });
-    }
-  }, 500);
-});
 
 // =========================================================
 // 사이드 상세 패널
@@ -1096,4 +1101,12 @@ function showNfDetail(r) {
 function closeNfDetail() {
   document.getElementById("nfDetailPanel").style.display = "none";
   document.querySelectorAll(".nf-rank-item").forEach(el => el.classList.remove("active"));
+}
+
+// 전국 보기로 되돌아가기
+function resetNationwideView() {
+  nationwideMap.setView([36.2, 127.8], 7, { animate: true });
+  document.getElementById("nfZoomBadge").innerText =
+    `전국 지점 보기 · ${nationwideCurrentOffset === 0 ? "현재" :
+      nationwideCurrentOffset === 30 ? "30분 후" : "1시간 후"} 기준`;
 }
