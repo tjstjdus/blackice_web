@@ -16,14 +16,24 @@ let regions = {};
 let realtimeMode = false;
 let liveTimer = null;
 
+// ── 전국 고속도로 예측 관련 전역 변수 ──
+let nationwideMap;
+let nationwideMarkers = [];
+let nationwideTopRisk = [];
+let nationwideCurrentOffset = 0;
+let autoFlyTimer = null;
+let autoFlyIndex = 0;
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     initMap();
     initLiveMap();
     initChart();
+    initNationwideMap();
 
     await loadRegions();
     await loadStations();   // 페이지 로드 시 관측소 마커 표시
+    await loadNationwideForecast(0);
 
     setDateLimit();
   } catch (error) {
@@ -824,4 +834,266 @@ function updateTable(results) {
 
     tbody.appendChild(row);
   });
+}
+// =========================================================
+// 전국 고속도로 미래 예측 — 지도 초기화
+// =========================================================
+
+function initNationwideMap() {
+  nationwideMap = L.map("nationwideMap", {
+    zoomControl: true,
+    scrollWheelZoom: true
+  }).setView([36.2, 127.8], 7);   // 전국 줌아웃 뷰
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "",
+    maxZoom: 18
+  }).addTo(nationwideMap);
+}
+
+// =========================================================
+// 탭 전환 — 현재 / 30분 후 / 1시간 후
+// =========================================================
+
+function switchNationwideTab(offsetMinutes, btnEl) {
+  document.querySelectorAll(".nf-tab").forEach(b => b.classList.remove("active"));
+  btnEl.classList.add("active");
+
+  stopAutoFlyTo();
+  closeNfDetail();
+  loadNationwideForecast(offsetMinutes);
+}
+
+// =========================================================
+// 전국 예측 데이터 로드
+// =========================================================
+
+async function loadNationwideForecast(offsetMinutes) {
+  nationwideCurrentOffset = offsetMinutes;
+
+  const badge = document.getElementById("nfZoomBadge");
+  const rankList = document.getElementById("nfRankList");
+
+  badge.innerText = "전국 고속도로 위험도 분석 중...";
+  rankList.innerHTML = `<div class="nf-loading">데이터 로딩 중...</div>`;
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/predict/nationwide?offset_minutes=${offsetMinutes}&top_n=10`
+    );
+    const data = await res.json();
+
+    if (data.status !== "success" || !data.results?.length) {
+      badge.innerText = "예측 데이터 없음";
+      rankList.innerHTML = `<div class="nf-loading">데이터를 불러오지 못했습니다.</div>`;
+      return;
+    }
+
+    nationwideTopRisk = data.top_risk || [];
+
+    renderNationwideMarkers(data.results);
+    renderRankList(nationwideTopRisk);
+
+    const label = offsetMinutes === 0 ? "현재" :
+                  offsetMinutes === 30 ? "30분 후" : "1시간 후";
+    badge.innerText = `${label} 기준 · ${data.target_time || ""}`;
+
+    // 전국 뷰로 리셋 후 자동 재생 시작
+    nationwideMap.setView([36.2, 127.8], 7, { animate: true });
+    startAutoFlyTo();
+
+  } catch (e) {
+    console.error("전국 예측 로드 실패:", e);
+    badge.innerText = "로드 실패 — 다시 시도해주세요";
+    rankList.innerHTML = `<div class="nf-loading">서버 연결에 실패했습니다.</div>`;
+  }
+}
+
+// =========================================================
+// 지도 마커 렌더링 (전체 지점)
+// =========================================================
+
+function getRiskColor(pct) {
+  if (pct >= 70) return "#ED1B2F";
+  if (pct >= 50) return "#E67E22";
+  if (pct >= 30) return "#F5A623";
+  return "#27AE60";
+}
+
+function renderNationwideMarkers(results) {
+  nationwideMarkers.forEach(m => nationwideMap.removeLayer(m));
+  nationwideMarkers = [];
+
+  results.forEach(r => {
+    const lat = Number(r["위도"]);
+    const lon = Number(r["경도"]);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+
+    const pct = Number(r.blackice_probability_percent || 0);
+    const color = getRiskColor(pct);
+    const isTop = nationwideTopRisk.some(t => t.asos_id === r.asos_id && t["위도"] === r["위도"]);
+
+    const icon = L.divIcon({
+      className: "",
+      html: `
+        <div class="${isTop ? "nf-pulse-marker" : ""}" style="
+          width: ${isTop ? 14 : 9}px; height: ${isTop ? 14 : 9}px;
+          background: ${color};
+          border: 1.5px solid #fff;
+          border-radius: 50%;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+        "></div>
+      `,
+      iconSize: [isTop ? 14 : 9, isTop ? 14 : 9],
+      iconAnchor: [isTop ? 7 : 4.5, isTop ? 7 : 4.5],
+      popupAnchor: [0, -10]
+    });
+
+    const marker = L.marker([lat, lon], { icon })
+      .addTo(nationwideMap)
+      .on("click", () => flyToPoint(r));
+
+    marker.bindPopup(`
+      <div style="font-family:'Noto Sans KR',sans-serif; min-width:150px;">
+        <div style="font-size:13px; font-weight:700; color:#1A1A1A; margin-bottom:4px;">
+          ${r["시도"] || ""} ${r["시군구"] || ""} ${r["읍면동"] || ""}
+        </div>
+        <div style="font-size:12px; color:${color}; font-weight:700;">
+          위험도 ${pct.toFixed(1)}%
+        </div>
+      </div>
+    `);
+
+    nationwideMarkers.push(marker);
+  });
+}
+
+// =========================================================
+// 우측 랭킹 패널 렌더링
+// =========================================================
+
+function renderRankList(topRisk) {
+  const rankList = document.getElementById("nfRankList");
+
+  if (!topRisk.length) {
+    rankList.innerHTML = `<div class="nf-loading">위험 지점이 없습니다.</div>`;
+    return;
+  }
+
+  rankList.innerHTML = topRisk.map((r, i) => {
+    const pct = Number(r.blackice_probability_percent || 0);
+    const color = getRiskColor(pct);
+    const name = `${r["시군구"] || ""} ${r["읍면동"] || ""}`.trim() || r["시도"] || "지점";
+
+    return `
+      <div class="nf-rank-item" data-idx="${i}" onclick="flyToRankItem(${i})">
+        <div class="nf-rank-num" style="background:${color};">${i + 1}</div>
+        <div class="nf-rank-name">${name}</div>
+        <div class="nf-rank-val" style="color:${color};">${pct.toFixed(0)}%</div>
+      </div>
+    `;
+  }).join("");
+}
+
+// =========================================================
+// flyTo — 특정 지점으로 부드럽게 줌인
+// =========================================================
+
+function flyToPoint(r) {
+  const lat = Number(r["위도"]);
+  const lon = Number(r["경도"]);
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+
+  stopAutoFlyTo();
+
+  nationwideMap.flyTo([lat, lon], 13, { duration: 2.2 });
+
+  const name = `${r["시군구"] || ""} ${r["읍면동"] || ""}`.trim() || r["시도"] || "선택 지점";
+  document.getElementById("nfZoomBadge").innerText = `${name} 확대 중`;
+
+  showNfDetail(r);
+  highlightRankItem(r);
+}
+
+function flyToRankItem(idx) {
+  const r = nationwideTopRisk[idx];
+  if (!r) return;
+  flyToPoint(r);
+}
+
+function highlightRankItem(r) {
+  document.querySelectorAll(".nf-rank-item").forEach(el => el.classList.remove("active"));
+  const idx = nationwideTopRisk.findIndex(
+    t => t.asos_id === r.asos_id && t["위도"] === r["위도"]
+  );
+  if (idx >= 0) {
+    const el = document.querySelector(`.nf-rank-item[data-idx="${idx}"]`);
+    if (el) el.classList.add("active");
+  }
+}
+
+// =========================================================
+// 자동 재생 — 위험도 상위 지점 순환 flyTo
+// =========================================================
+
+function startAutoFlyTo() {
+  stopAutoFlyTo();
+
+  if (!nationwideTopRisk.length) return;
+
+  autoFlyIndex = 0;
+
+  const runNext = () => {
+    if (autoFlyIndex >= nationwideTopRisk.length) {
+      autoFlyIndex = 0;
+    }
+    flyToPoint(nationwideTopRisk[autoFlyIndex]);
+    autoFlyIndex++;
+  };
+
+  runNext();
+  autoFlyTimer = setInterval(runNext, 4000);
+}
+
+function stopAutoFlyTo() {
+  if (autoFlyTimer) {
+    clearInterval(autoFlyTimer);
+    autoFlyTimer = null;
+  }
+}
+
+// 사용자가 지도를 직접 조작하면 자동 재생 중단
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (nationwideMap) {
+      nationwideMap.on("dragstart zoomstart", () => {
+        if (autoFlyTimer) stopAutoFlyTo();
+      });
+    }
+  }, 500);
+});
+
+// =========================================================
+// 사이드 상세 패널
+// =========================================================
+
+function showNfDetail(r) {
+  const panel = document.getElementById("nfDetailPanel");
+  panel.style.display = "block";
+
+  const name = `${r["시도"] || ""} ${r["시군구"] || ""} ${r["읍면동"] || ""}`.trim();
+  const pct = Number(r.blackice_probability_percent || 0);
+
+  document.getElementById("nfDetailName").innerText = name || "지점 정보 없음";
+  document.getElementById("nfDetailRisk").innerText = `${pct.toFixed(1)}%`;
+  document.getElementById("nfDetailIcing").innerText = formatValue(r.icing_probability_percent, "%");
+  document.getElementById("nfDetailTemp").innerText = formatValue(r.기온, "℃");
+  document.getElementById("nfDetailHumidity").innerText = formatValue(r.습도, "%");
+  document.getElementById("nfDetailWind").innerText = formatValue(r.풍속, "m/s");
+  document.getElementById("nfDetailStation").innerText = r.asos_name || "-";
+}
+
+function closeNfDetail() {
+  document.getElementById("nfDetailPanel").style.display = "none";
+  document.querySelectorAll(".nf-rank-item").forEach(el => el.classList.remove("active"));
 }
