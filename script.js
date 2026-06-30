@@ -272,8 +272,10 @@ async function runRealtimePrediction() {
 
     setMainMap("live");
 
-    document.getElementById("liveUpdatedAt").innerText =
-      `실시간 업데이트: ${now.date} ${now.time}`;
+    const liveUpdatedEl = document.getElementById("liveUpdatedAt");
+    if (liveUpdatedEl) {
+      liveUpdatedEl.innerText = `실시간 업데이트: ${now.date} ${now.time}`;
+    }
 
   } catch (error) {
     console.error(error);
@@ -921,8 +923,8 @@ async function loadNationwideForecast(offsetMinutes) {
 // =========================================================
 
 function getRiskColor(pct) {
-  if (pct >= 70) return "#ED1B2F";
-  if (pct >= 50) return "#E67E22";
+  if (pct >= 80) return "#ED1B2F";
+  if (pct >= 60) return "#E67E22";
   if (pct >= 30) return "#F5A623";
   return "#27AE60";
 }
